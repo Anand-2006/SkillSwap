@@ -1,3 +1,4 @@
+// src/components/Bank.tsx
 import { useEffect, useMemo, useState } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { useSnackbar } from 'notistack'
@@ -35,6 +36,7 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [statements, setStatements] = useState<Statement[]>([])
   const [depositors, setDepositors] = useState<Array<{ address: string; amount: string }>>([])
+  const [activeTab, setActiveTab] = useState<'transactions' | 'depositors'>('transactions')
 
   useEffect(() => {
     algorand.setDefaultSigner(transactionSigner)
@@ -48,111 +50,70 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
       const idx = algorand.client.indexer
       const appAddr = String(getApplicationAddress(appId))
       const allTransactions: Statement[] = []
-      
-      console.log('Searching for app transactions with app ID:', appId)
-      
-      // Search for application call transactions from user
+
       const appTxRes = await idx
         .searchForTransactions()
         .address(activeAddress)
         .txType('appl')
         .do()
-      
-      console.log('App call transactions found:', appTxRes.transactions?.length || 0)
-      
-      // Process application call transactions (deposits/withdrawals)
+
       const appTransactions = (appTxRes.transactions || [])
-        .filter((t: any) => {
-          // Filter for transactions calling our specific app
-          const isOurApp = t.applicationTransaction && 
-                          Number(t.applicationTransaction.applicationId) === Number(appId)
-          console.log('Checking transaction:', t.id, {
-            hasAppTxn: !!t.applicationTransaction,
-            appId: t.applicationTransaction?.applicationId,
-            targetAppId: Number(appId),
-            isOurApp,
-            sender: t.sender,
-            activeAddress
-          })
-          return isOurApp
-        })
+        .filter((t: any) => t.applicationTransaction && Number(t.applicationTransaction.applicationId) === Number(appId))
         .map((t: any) => {
-        // Determine transaction type from logs or method name
-        let amount = 1 // Default amount
-        let type: 'deposit' | 'withdrawal' = 'deposit'
-        
-        // Check logs for method name
-        if (t.logs && t.logs.length > 0) {
-          const logStr = t.logs.join(' ')
-          if (logStr.includes('withdraw') || logStr.includes('Withdraw')) {
-            type = 'withdrawal'
+          let amount = 0
+          let type: 'deposit' | 'withdrawal' = 'deposit'
+
+          if (t.logs && t.logs.length > 0) {
+            const logStr = t.logs.join(' ')
+            if (logStr.toLowerCase().includes('withdraw')) type = 'withdrawal'
           }
-        }
-        
-        // Check inner transactions for actual payment amounts
-        if (t.innerTxns && t.innerTxns.length > 0) {
-          console.log('Inner transactions for', t.id, ':', t.innerTxns)
-          for (const innerTxn of t.innerTxns) {
-            if (innerTxn.paymentTransaction) {
-              amount = Number(innerTxn.paymentTransaction.amount) / 1000000
-              // If there's an inner payment from app to user, it's definitely a withdrawal
-              if (innerTxn.sender === appAddr && innerTxn.paymentTransaction.receiver === activeAddress) {
-                type = 'withdrawal'
+
+          if (t.innerTxns) {
+            for (const innerTxn of t.innerTxns) {
+              if (innerTxn.paymentTransaction) {
+                amount = Number(innerTxn.paymentTransaction.amount) / 1000000
+                if (innerTxn.sender === appAddr) type = 'withdrawal'
+                break
               }
-              console.log('Found payment in inner txn:', { amount, type, sender: innerTxn.sender, receiver: innerTxn.paymentTransaction.receiver })
-              break
             }
           }
-        }
-        
-        // If no inner transactions found but it's a withdraw call, still show it
-        console.log('Transaction', t.id, 'type:', type, 'amount:', amount)
-        
-        return {
-          id: t.id,
-          round: Number(t.confirmedRound || t['confirmed-round']),
-          amount,
-          type,
-          sender: t.sender,
-          receiver: appAddr,
-          timestamp: Number(t.roundTime || t['round-time']),
-        }
-      })
-      
+
+          return {
+            id: t.id,
+            round: Number(t.confirmedRound || t['confirmed-round']),
+            amount,
+            type,
+            sender: t.sender,
+            receiver: appAddr,
+            timestamp: Number(t.roundTime || t['round-time']),
+          }
+        })
+
       allTransactions.push(...appTransactions)
-      
-      // Also search for direct payment transactions to/from app address
+
       const payTxRes = await idx
         .searchForTransactions()
         .address(appAddr)
         .txType('pay')
         .do()
-      
-      console.log('Payment transactions found:', payTxRes.transactions?.length || 0)
-      
+
       const paymentTransactions = (payTxRes.transactions || [])
-        .filter((t: any) => {
-          // Only include withdrawals (app to user) and exclude deposits (user to app) 
-          // since deposits are already captured in app transactions
-          return (t.sender === appAddr && t.paymentTransaction?.receiver === activeAddress)
-        })
+        .filter((t: any) => (t.sender === appAddr && t.paymentTransaction?.receiver === activeAddress))
         .map((t: any) => ({
           id: t.id,
           round: Number(t.confirmedRound || t['confirmed-round']),
           amount: Number(t.paymentTransaction.amount) / 1000000,
-          type: t.sender === activeAddress ? 'deposit' as const : 'withdrawal' as const,
+          type: 'withdrawal' as const,
           sender: t.sender,
           receiver: t.paymentTransaction.receiver,
           timestamp: Number(t.roundTime || t['round-time']),
         }))
-      
+
       allTransactions.push(...paymentTransactions)
-      
-      console.log('Total relevant transactions:', allTransactions.length)
       setStatements(allTransactions.sort((a, b) => b.round - a.round))
     } catch (e) {
-      console.error('Error in refreshStatements:', e)
-      enqueueSnackbar(`Error loading statements: ${(e as Error).message}`, { variant: 'error' })
+      console.error(e);
+      // enqueueSnackbar(`Error loading statements: ${(e as Error).message}`, { variant: 'error' })
     }
   }
 
@@ -163,20 +124,19 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
       const boxes = await algod.getApplicationBoxes(appId).do()
       const list = [] as Array<{ address: string; amount: string }>
       for (const b of boxes.boxes as Array<{ name: Uint8Array }>) {
-        // Skip empty or non-account keys if any
         const nameBytes: Uint8Array = b.name
         if (nameBytes.length !== 32) continue
         const box = await algod.getApplicationBoxByName(appId, nameBytes).do()
         const addr = algosdk.encodeAddress(nameBytes)
         const valueBuf: Uint8Array = box.value
-        // UInt64 big-endian
         const amountMicroAlgos = BigInt(new DataView(Buffer.from(valueBuf).buffer).getBigUint64(0, false))
         const amountAlgos = (Number(amountMicroAlgos) / 1000000).toString()
         list.push({ address: addr, amount: amountAlgos })
       }
       setDepositors(list)
     } catch (e) {
-      enqueueSnackbar(`Error loading depositors: ${(e as Error).message}`, { variant: 'error' })
+      console.error(e);
+      // enqueueSnackbar(`Error loading depositors: ${(e as Error).message}`, { variant: 'error' })
     }
   }
 
@@ -188,20 +148,16 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
 
   const deposit = async () => {
     try {
-      if (!activeAddress || activeAddress.trim() === '') throw new Error('Please connect your wallet first')
-      if (!transactionSigner) throw new Error('Wallet signer unavailable')
+      if (!activeAddress) throw new Error('Connect wallet first')
       if (!appId || appId <= 0) throw new Error('Enter valid App ID')
       const amountAlgos = Number(depositAmount)
       if (!amountAlgos || amountAlgos <= 0) throw new Error('Enter amount in Algos')
-      const amountMicroAlgos = Math.round(amountAlgos * 1000000) // Convert to microAlgos
+      const amountMicroAlgos = Math.round(amountAlgos * 1000000)
       setLoading(true)
 
       const sp = await algorand.client.algod.getTransactionParams().do()
       const appAddr = getApplicationAddress(appId)
-      
-      if (!algosdk.isValidAddress(activeAddress)) throw new Error('Invalid wallet address')
-      if (!algosdk.isValidAddress(String(appAddr))) throw new Error('Invalid app address; check App ID')
-      
+
       const payTxn = makePaymentTxnWithSuggestedParamsFromObject({
         sender: activeAddress,
         receiver: appAddr,
@@ -209,28 +165,19 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
         suggestedParams: sp,
       })
 
-      const client = new BankClient({ 
-        appId: BigInt(appId), 
-        algorand, 
-        defaultSigner: transactionSigner 
+      const client = new BankClient({ appId: BigInt(appId), algorand, defaultSigner: transactionSigner })
+      await client.send.deposit({
+        args: { memo: memo || '', payTxn: { txn: payTxn, signer: transactionSigner } },
+        sender: activeAddress
       })
-      
-      const res = await client.send.deposit({ 
-        args: { 
-          memo: memo || '', 
-          payTxn: { txn: payTxn, signer: transactionSigner } 
-        }, 
-        sender: activeAddress 
-      })
-      
-      const confirmedRound = (res.confirmation as any)?.['confirmed-round']
-      enqueueSnackbar(`Deposited successfully in round ${confirmedRound}`, { variant: 'success' })
+
+      enqueueSnackbar(`Successfully funded task with ${amountAlgos} ALGO`, { variant: 'success' })
       setDepositAmount('')
       setMemo('')
       void refreshStatements()
       void refreshDepositors()
     } catch (e) {
-      enqueueSnackbar(`Deposit failed: ${(e as Error).message}`, { variant: 'error' })
+      enqueueSnackbar(`Funding failed: ${(e as Error).message}`, { variant: 'error' })
     } finally {
       setLoading(false)
     }
@@ -238,33 +185,26 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
 
   const withdraw = async () => {
     try {
-      if (!activeAddress || activeAddress.trim() === '') throw new Error('Please connect your wallet first')
-      if (!transactionSigner) throw new Error('Wallet signer unavailable')
+      if (!activeAddress) throw new Error('Connect wallet first')
       if (!appId || appId <= 0) throw new Error('Enter valid App ID')
       const amount = Number(withdrawAmount)
       if (!amount || amount <= 0) throw new Error('Enter amount in Algos')
-      const amountMicroAlgos = Math.round(amount * 1000000) // Convert to microAlgos
+      const amountMicroAlgos = Math.round(amount * 1000000)
       setLoading(true)
 
-      const client = new BankClient({ 
-        appId: BigInt(appId), 
-        algorand, 
-        defaultSigner: transactionSigner 
-      })
-      
-      const res = await client.send.withdraw({ 
-        args: { amount: amountMicroAlgos }, 
+      const client = new BankClient({ appId: BigInt(appId), algorand, defaultSigner: transactionSigner })
+      await client.send.withdraw({
+        args: { amount: amountMicroAlgos },
         sender: activeAddress,
         extraFee: microAlgos(2000)
       })
-      
-      const confirmedRound = (res.confirmation as any)?.['confirmed-round']
-      enqueueSnackbar(`Withdraw executed in round ${confirmedRound}`, { variant: 'success' })
+
+      enqueueSnackbar(`Successfully released ${amount} ALGO`, { variant: 'success' })
       setWithdrawAmount('')
       void refreshStatements()
       void refreshDepositors()
     } catch (e) {
-      enqueueSnackbar(`Withdraw failed: ${(e as Error).message}`, { variant: 'error' })
+      enqueueSnackbar(`Release failed: ${(e as Error).message}`, { variant: 'error' })
     } finally {
       setLoading(false)
     }
@@ -278,92 +218,221 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
       const result = await factory.send.create.bare()
       const newId = Number(result.appClient.appId)
       setAppId(newId)
-      enqueueSnackbar(`Bank deployed. App ID: ${newId}`, { variant: 'success' })
+      enqueueSnackbar(`Task Escrow Created. ID: ${newId}`, { variant: 'success' })
     } catch (e) {
-      enqueueSnackbar(`Deploy failed: ${(e as Error).message}`, { variant: 'error' })
+      enqueueSnackbar(`Creation failed: ${(e as Error).message}`, { variant: 'error' })
     } finally {
       setDeploying(false)
     }
   }
 
+  const totalValueLocked = depositors.reduce((acc, curr) => acc + parseFloat(curr.amount), 0).toFixed(2);
+
   return (
-    <dialog id="bank_modal" className={`modal ${openModal ? 'modal-open' : ''} bg-slate-200`}>
-      <form method="dialog" className="modal-box max-w-3xl">
-        <h3 className="font-bold text-lg">Bank Contract</h3>
-        <div className="mt-2 flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm">Application ID</label>
-            <input className="input input-bordered" type="number" value={appId} onChange={(e) => setAppId(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Enter deployed Bank App ID" />
-            {appAddress && (
-              <div className="alert alert-info text-xs break-all">App Address: {appAddress}</div>
-            )}
-          </div>
+    <dialog id="bank_modal" className={`modal ${openModal ? 'modal-open' : ''}`}>
+      <div className="modal-box bg-[#0f172a] border border-slate-700/50 p-0 overflow-hidden max-w-5xl w-full rounded-xl shadow-2xl backdrop-blur-xl">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2 p-4 rounded-lg bg-white">
-              <div className="font-semibold">Deploy (optional)</div>
-              <button className={`btn btn-accent ${deploying ? 'loading' : ''}`} disabled={deploying || !activeAddress} onClick={(e) => { e.preventDefault(); void deployContract() }}>Deploy Bank</button>
-              <p className="text-xs text-gray-500">Or enter an existing App ID above.</p>
+        {/* Modal Header */}
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-700/50 bg-slate-900/30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-            <div className="flex flex-col gap-2 p-4 rounded-lg bg-white">
-              <div className="font-semibold">Deposit</div>
-              <input className="input input-bordered" placeholder="Memo (optional)" value={memo} onChange={(e) => setMemo(e.target.value)} />
-              <input className="input input-bordered" placeholder="Amount (Algos)" type="number" step="0.000001" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
-              <button className={`btn btn-primary ${loading ? 'loading' : ''}`} disabled={loading || !activeAddress || !appId} onClick={(e) => { e.preventDefault(); void deposit() }}>Deposit</button>
-            </div>
-            <div className="flex flex-col gap-2 p-4 rounded-lg bg-white">
-              <div className="font-semibold">Withdraw</div>
-              <input className="input input-bordered" placeholder="Amount (Algos)" type="number" step="0.000001" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} />
-              <button className={`btn btn-secondary ${loading ? 'loading' : ''}`} disabled={loading || !activeAddress || !appId} onClick={(e) => { e.preventDefault(); void withdraw() }}>Withdraw</button>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-100">Task Escrow Pool</h3>
+              <p className="text-xs text-slate-500 font-mono">Contract ID: <span className="text-slate-300">{appId || 'Not Selected'}</span></p>
             </div>
           </div>
 
-          <div className="divider">Statements</div>
-          <div className="max-h-56 overflow-auto bg-white rounded-lg p-2">
-            {statements.length === 0 ? (
-              <div className="text-sm text-gray-500">No transactions found.</div>
-            ) : (
-              <ul className="text-sm">
-                {statements.map((s) => (
-                  <li key={s.id} className="py-1 flex justify-between items-center border-b last:border-0">
-                    <span className={s.type === 'deposit' ? 'text-emerald-600' : 'text-amber-700'}>{s.type}</span>
-                    <span>round {s.round}</span>
-                    {/* <span>{s.amount} Algos</span> */}
-                    <a 
-                      href={`https://lora.algokit.io/testnet/transaction/${s.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline text-xs"
-                    >
-                      View
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="divider">Depositors</div>
-          <div className="max-h-56 overflow-auto bg-white rounded-lg p-2">
-            {depositors.length === 0 ? (
-              <div className="text-sm text-gray-500">No depositors yet.</div>
-            ) : (
-              <ul className="text-sm">
-                {depositors.map((d) => (
-                  <li key={d.address} className="py-1 flex justify-between border-b last:border-0">
-                    <span className="truncate mr-2">{d.address}</span>
-                    <span>{d.amount} Algos</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="modal-action">
-            <button className="btn" onClick={closeModal} disabled={loading}>Close</button>
-            <button className="btn btn-outline" onClick={(e) => { e.preventDefault(); void refreshStatements(); void refreshDepositors() }}>Refresh</button>
+          <div className="flex items-center gap-6">
+            <div className="text-right hidden sm:block">
+              <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-widest">Total Value Locked</span>
+              <span className="text-lg font-mono font-medium text-slate-200">{totalValueLocked} ALGO</span>
+            </div>
+            <button onClick={closeModal} className="text-slate-400 hover:text-white transition-colors">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
+
+        <div className="flex flex-col lg:flex-row h-[650px]">
+          {/* Sidebar Controls */}
+          <div className="w-full lg:w-80 bg-[#0f172a] border-b lg:border-b-0 lg:border-r border-slate-800 p-6 flex flex-col gap-8 overflow-y-auto">
+
+            <div className="space-y-4">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Contract Configuration</label>
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  className="input-field text-sm font-mono"
+                  placeholder="Enter App ID..."
+                  value={appId}
+                  onChange={(e) => setAppId(e.target.value === '' ? '' : Number(e.target.value))}
+                />
+                <button
+                  onClick={deployContract}
+                  disabled={deploying || !activeAddress}
+                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium rounded-md transition-all border border-slate-700 shadow-sm"
+                >
+                  {deploying ? 'Deploying Contract...' : 'Create New Escrow'}
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-800 pt-6 space-y-4">
+              <h4 className="text-sm font-medium text-slate-200 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                Fund Task
+              </h4>
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    className="input-field text-lg font-medium pl-4 pr-12"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                  />
+                  <span className="absolute right-3 top-3.5 text-xs text-slate-500 font-bold">ALGO</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Memo / Reference"
+                  className="input-field text-xs"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                />
+                <button
+                  onClick={deposit}
+                  disabled={loading || !appId}
+                  className="btn-primary w-full py-2 text-xs"
+                >
+                  Deposit Funds
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-800 pt-6 space-y-4">
+              <h4 className="text-sm font-medium text-slate-200 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                Release Payment
+              </h4>
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    className="input-field text-lg font-medium pl-4 pr-12"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                  />
+                  <span className="absolute right-3 top-3.5 text-xs text-slate-500 font-bold">ALGO</span>
+                </div>
+                <button
+                  onClick={withdraw}
+                  disabled={loading || !appId}
+                  className="w-full py-2 bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-md text-xs font-medium transition-colors"
+                >
+                  Release to Worker
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col bg-[#0f172a]/50">
+            <div className="border-b border-slate-800 px-8 pt-6 flex gap-8">
+              <button
+                onClick={() => setActiveTab('transactions')}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'transactions' ? 'border-emerald-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+              >
+                Transaction Log
+              </button>
+              <button
+                onClick={() => setActiveTab('depositors')}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'depositors' ? 'border-emerald-500 text-slate-200' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+              >
+                Contributors
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-0 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 px-8 py-3 bg-slate-900/30 border-b border-slate-800 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                <div className="col-span-2">Type</div>
+                <div className="col-span-6">Details / Sender</div>
+                <div className="col-span-4 text-right">Amount</div>
+              </div>
+
+              {activeTab === 'transactions' && (
+                <div className="divide-y divide-slate-800/50">
+                  {statements.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <p className="text-slate-500 text-sm">No activity recorded on this contract yet.</p>
+                      <p className="text-slate-600 text-xs mt-1">Deploy a contract or enter an App ID to view data.</p>
+                    </div>
+                  ) : (
+                    statements.map((s) => (
+                      <div key={s.id} className="grid grid-cols-12 gap-4 px-8 py-4 hover:bg-slate-800/20 transition-colors items-center group">
+                        <div className="col-span-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${s.type === 'deposit' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                            {s.type}
+                          </span>
+                        </div>
+                        <div className="col-span-6">
+                          <p className="text-slate-300 text-xs font-mono truncate mb-0.5">{s.sender}</p>
+                          <a href={`https://lora.algokit.io/testnet/transaction/${s.id}`} target="_blank" rel="noreferrer" className="text-[10px] text-slate-600 hover:text-emerald-500 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                            View Explorer
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          </a>
+                        </div>
+                        <div className="col-span-4 text-right">
+                          <span className={`font-mono text-sm font-medium ${s.type === 'deposit' ? 'text-emerald-400' : 'text-slate-400'}`}>
+                            {s.type === 'deposit' ? '+' : '-'}{s.amount.toFixed(4)} <span className="text-xs text-slate-600">ALGO</span>
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'depositors' && (
+                <div className="divide-y divide-slate-800/50">
+                  {depositors.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <p className="text-slate-500 text-sm">No contributors found.</p>
+                    </div>
+                  ) : (
+                    depositors.map((d) => (
+                      <div key={d.address} className="grid grid-cols-12 gap-4 px-8 py-4 hover:bg-slate-800/20 transition-colors items-center">
+                        <div className="col-span-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            Holder
+                          </span>
+                        </div>
+                        <div className="col-span-6">
+                          <p className="text-slate-300 text-xs font-mono truncate">{d.address}</p>
+                        </div>
+                        <div className="col-span-4 text-right">
+                          <span className="font-mono text-sm font-medium text-slate-200">{parseFloat(d.amount).toFixed(2)} <span className="text-xs text-slate-600">ALGO</span></span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      <form method="dialog" className="modal-backdrop bg-slate-950/80 backdrop-blur-sm">
+        <button onClick={closeModal}>close</button>
       </form>
     </dialog>
   )
@@ -371,4 +440,4 @@ const Bank = ({ openModal, closeModal }: BankProps) => {
 
 export default Bank
 
-
+// End of file

@@ -1,3 +1,84 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply antialiased text-slate-400 bg-[#0f172a];
+        /* Slate 900 */
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply text-slate-100 tracking-tight font-medium;
+    }
+}
+
+@layer components {
+
+    /* SaaS Card: Professional, minimal, subtle borders */
+    .card-premium {
+        @apply bg-[#1e293b]/50 border border-slate-700/50 rounded-lg shadow-sm backdrop-blur-sm transition-all duration-200;
+    }
+
+    .card-premium:hover {
+        @apply border-slate-600/50 shadow-md transform -translate-y-0.5;
+    }
+
+    /* Primary Action: Muted, professional styling */
+    .btn-primary {
+        @apply px-4 py-2 bg-emerald-600/90 hover:bg-emerald-600 text-white text-sm font-medium rounded-[6px] shadow-sm transition-all duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-1 focus:ring-offset-[#0f172a];
+    }
+
+    /* Secondary Action: Subtle ghost/outline style */
+    .btn-secondary {
+        @apply px-4 py-2 bg-transparent border border-slate-700/75 hover:border-slate-600 text-slate-300 hover:text-white text-sm font-medium rounded-[6px] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-slate-500/20;
+    }
+
+    /* Ghost Button (New) */
+    .btn-ghost {
+        @apply px-3 py-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 rounded-md transition-colors text-sm font-medium;
+    }
+
+    /* Form Inputs: Clean, low contrast until focused */
+    .input-field {
+        @apply w-full bg-[#1e293b]/50 border border-slate-700/75 rounded-[6px] px-3 py-2.5 text-slate-200 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-150;
+    }
+
+    /* Data Table Row: Minimalist list view */
+    .table-row-premium {
+        @apply border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors duration-150 cursor-pointer;
+    }
+
+    /* Badges: Muted, low saturation */
+    .badge-emerald {
+        @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 ring-1 ring-inset ring-emerald-500/10;
+    }
+
+    .badge-slate {
+        @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800/50 text-slate-400 border border-slate-700/50;
+    }
+}
+
+/* Scrollbar: Dark and subtle */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-[#0f172a];
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full border-2 border-[#0f172a];
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-700;
+}

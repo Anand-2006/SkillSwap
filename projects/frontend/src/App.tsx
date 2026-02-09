@@ -1,7 +1,11 @@
 import { SupportedWallet, WalletId, WalletManager, WalletProvider } from '@txnlab/use-wallet-react'
 import { SnackbarProvider } from 'notistack'
 import Home from './Home'
+import Auth from './components/Auth'
 import { getAlgodConfigFromViteEnvironment, getKmdConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import { useEffect, useState } from 'react'
+import { supabase } from './utils/supabaseClient'
+import { Session } from '@supabase/supabase-js'
 
 let supportedWallets: SupportedWallet[]
 if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
@@ -22,13 +26,26 @@ if (import.meta.env.VITE_ALGOD_NETWORK === 'localnet') {
     { id: WalletId.PERA },
     { id: WalletId.EXODUS },
     { id: WalletId.LUTE },
-    // If you are interested in WalletConnect v2 provider
-    // refer to https://github.com/TxnLab/use-wallet for detailed integration instructions
   ]
 }
 
 export default function App() {
   const algodConfig = getAlgodConfigFromViteEnvironment()
+  const [session, setSession] = useState<Session | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const walletManager = new WalletManager({
     wallets: supportedWallets,
@@ -50,8 +67,9 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider manager={walletManager}>
-        <Home />
+        {!session ? <Auth onLogin={() => { }} /> : <Home />}
       </WalletProvider>
     </SnackbarProvider>
   )
 }
+

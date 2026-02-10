@@ -82,3 +82,16 @@
 ::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-700;
 }
+
+/* Custom Glow Effects */
+.glow-indigo {
+    background: radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.08) 0%, transparent 40%);
+}
+
+.glow-violet {
+    background: radial-gradient(circle at 20% 40%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+}
+
+.border-subtle {
+    border-color: rgba(255, 255, 255, 0.08);
+}

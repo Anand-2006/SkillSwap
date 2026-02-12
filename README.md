@@ -101,120 +101,134 @@ Install before running:
 Install AlgoKit:
 ```bash
 pipx install algokit
+## Installation & Setup
 
-Installation & Setup
-Clone repository
-git clone https://github.com/Anand-2006/SkillSwap.git
+### Install AlgoKit
+pipx install algokit
+
+### Clone repository
+git clone https://github.com/Anand-2006/SkillSwap.git  
 cd SkillSwap
 
-Bootstrap dependencies
+### Bootstrap dependencies
 algokit bootstrap all
 
-Start local blockchain
+### Start local blockchain
 algokit localnet start
 
-Deploy smart contracts
-cd projects/contracts
+### Deploy smart contracts
+cd projects/contracts  
 algokit project deploy localnet
 
-Run frontend
-cd ../frontend
-npm install
-npm run dev
+### Run frontend
+cd ../frontend  
+npm install  
+npm run dev  
 
-
-Open:
-
+Open in browser:  
 http://localhost:5173
 
-Environment Variables
 
-Inside projects/frontend:
+---
+
+## Environment Variables
+
+Inside `projects/frontend`:
 
 cp .env.template .env
 
-
 Fill values:
 
-VITE_SUPABASE_URL=your_url
-VITE_SUPABASE_ANON_KEY=your_key
-VITE_PINATA_JWT=your_token
-VITE_GATEWAY_URL=your_gateway
-VITE_WALLETCONNECT_PROJECT_ID=your_project_id
+VITE_SUPABASE_URL=your_url  
+VITE_SUPABASE_ANON_KEY=your_key  
+VITE_PINATA_JWT=your_token  
+VITE_GATEWAY_URL=your_gateway  
+VITE_WALLETCONNECT_PROJECT_ID=your_project_id  
 
-Demo Flow
 
-Connect wallet (Pera)
+---
 
-Select mode: Individual task or Group pool
+## Demo Flow
 
-Create task or create pool and set target
+1. Connect wallet (Pera)  
+2. Select mode: Individual task or Group pool  
+3. Create task or create pool and set target  
+4. Members deposit funds (group mode)  
+5. Leader posts task  
+6. Provider submits work  
+7. Leader approves → payment released  
+8. Show transaction on Algorand explorer  
 
-Members deposit funds (group mode)
 
-Leader posts task
+---
 
-Provider submits work
-
-Leader approves → payment released
-
-Show transaction on Algorand explorer
-
-Smart Contracts
+## Smart Contracts
 
 Located in:
 
 projects/contracts
 
-Bank Contract
+### Bank Contract
+- deposit()  
+- withdraw()  
+- Tracks balances on-chain  
 
-deposit()
+### Escrow / Task Contracts
+- Lock funds  
+- Release after approval  
+- Refund on timeout  
 
-withdraw()
+### Counter Contract
+- Demonstrates shared global state  
 
-Tracks balances on-chain
 
-Escrow / Task Contracts
+## Present Implementation 
 
-Lock funds
+- Wallet connectivity working (Pera, Defly, and other Algorand-compatible wallets)
+- Task fulfillment flow implemented:
+  - Browse tasks in the marketplace
+  - Open Escrow Terminal
+  - Lock ALGO into smart contract
+  - Release funds securely to worker
+- Compute rental flow implemented using the same escrow mechanism
+- Blockchain tools operational, including:
+  - Payments
+  - ASA creation
+  - NFT minting
 
-Release after approval
+---
 
-Refund on timeout
+## Troubleshooting
 
-Counter Contract
-
-Demonstrates shared global state
-
-Troubleshooting
-
-App ID not found
-
+**App ID not found**  
 Redeploy contracts after restarting LocalNet.
 
-Transactions failing
-
+**Transactions failing**  
 Ensure wallet is connected to LocalNet or TestNet.
 
-Uploads failing
-
+**Uploads failing**  
 Verify Pinata JWT token.
 
-Future Scope
 
-Reputation and rating system
+---
 
-DAO-based dispute resolution
+## Future Scope
 
-Mobile app
+- Reputation and rating system  
+- DAO-based dispute resolution  
+- Mobile app  
+- AI-based task matching  
+- Cross-campus deployment  
 
-AI-based task matching
 
-Cross-campus deployment
+---
 
-License
-
+## License
 MIT License
 
-Team : Penguin_on_Peak
+
+---
+
+## Team
+Penguin_on_Peak  
 Hackspiration 2026

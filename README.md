@@ -99,7 +99,6 @@ Install before running:
 - AlgoKit CLI  
 
 Install AlgoKit:
-```bash
 pipx install algokit
 ## Installation & Setup
 

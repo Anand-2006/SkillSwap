@@ -24,7 +24,7 @@ import { SendParams, SendSingleTransactionResult, SendAtomicTransactionComposerR
 import { Address, encodeAddress, modelsv2, OnApplicationComplete, Transaction, TransactionSigner } from 'algosdk'
 import SimulateResponse = modelsv2.SimulateResponse
 
-export const APP_SPEC: Arc56Contract = {"name":"Bank","structs":{},"methods":[{"name":"deposit","args":[{"type":"string","name":"memo"},{"type":"pay","name":"pay_txn"}],"returns":{"type":"uint64"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"desc":"Accepts a payment into the app escrow and records sender's deposited balance","events":[],"recommendations":{}},{"name":"withdraw","args":[{"type":"uint64","name":"amount"}],"returns":{"type":"uint64"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"desc":"Sends ALGO back to the caller from their recorded balance","events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":1,"bytes":0},"local":{"ints":0,"bytes":0}},"keys":{"global":{"total_deposit":{"keyType":"AVMString","valueType":"AVMUint64","key":"dG90YWxfZGVwb3NpdA=="}},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{"deposits":{"keyType":"address","valueType":"uint64","prefix":""}}}},"bareActions":{"create":["NoOp"],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[112],"errorMessage":"Deposit amount must be greater than zero"},{"pc":[180],"errorMessage":"No deposits found for this account"},{"pc":[42],"errorMessage":"OnCompletion must be NoOp"},{"pc":[75],"errorMessage":"OnCompletion must be NoOp && can only call when creating"},{"pc":[105],"errorMessage":"Receiver must be the contract address"},{"pc":[186],"errorMessage":"Withdrawal amount exceeds balance"},{"pc":[183],"errorMessage":"Withdrawal amount must be greater than zero"},{"pc":[145],"errorMessage":"check self.deposits entry exists"},{"pc":[135],"errorMessage":"check self.total_deposit exists"},{"pc":[88],"errorMessage":"invalid number of bytes for (len+utf8[])"},{"pc":[172],"errorMessage":"invalid number of bytes for uint64"},{"pc":[98],"errorMessage":"transaction type is pay"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuYXBwcm92YWxfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIGludGNibG9jayAxIDAKICAgIGJ5dGVjYmxvY2sgInRvdGFsX2RlcG9zaXQiIDB4MTUxZjdjNzUKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBibnogbWFpbl9hZnRlcl9pZl9lbHNlQDIKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjExCiAgICAvLyBzZWxmLnRvdGFsX2RlcG9zaXQgPSBVSW50NjQoMCkKICAgIGJ5dGVjXzAgLy8gInRvdGFsX2RlcG9zaXQiCiAgICBpbnRjXzEgLy8gMAogICAgYXBwX2dsb2JhbF9wdXQKCm1haW5fYWZ0ZXJfaWZfZWxzZUAyOgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgQmFuayhBUkM0Q29udHJhY3QpOgogICAgdHhuIE51bUFwcEFyZ3MKICAgIGJ6IG1haW5fX19hbGdvcHlfZGVmYXVsdF9jcmVhdGVAMTEKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gbXVzdCBiZSBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYXNzZXJ0CiAgICBwdXNoYnl0ZXNzIDB4OWY1OTdjMzIgMHgzMTIxNDE3NiAvLyBtZXRob2QgImRlcG9zaXQoc3RyaW5nLHBheSl1aW50NjQiLCBtZXRob2QgIndpdGhkcmF3KHVpbnQ2NCl1aW50NjQiCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBkZXBvc2l0IHdpdGhkcmF3CiAgICBlcnIKCm1haW5fX19hbGdvcHlfZGVmYXVsdF9jcmVhdGVAMTE6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgIQogICAgJiYKICAgIHJldHVybiAvLyBvbiBlcnJvcjogT25Db21wbGV0aW9uIG11c3QgYmUgTm9PcCAmJiBjYW4gb25seSBjYWxsIHdoZW4gY3JlYXRpbmcKCgovLyBzbWFydF9jb250cmFjdHMuYmFuay5jb250cmFjdC5CYW5rLmRlcG9zaXRbcm91dGluZ10oKSAtPiB2b2lkOgpkZXBvc2l0OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MTMKICAgIC8vIEBhYmltZXRob2QoKQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZHVwCiAgICBpbnRjXzEgLy8gMAogICAgZXh0cmFjdF91aW50MTYKICAgIHB1c2hpbnQgMiAvLyAyCiAgICArCiAgICBzd2FwCiAgICBsZW4KICAgID09CiAgICBhc3NlcnQgLy8gaW52YWxpZCBudW1iZXIgb2YgYnl0ZXMgZm9yIChsZW4rdXRmOFtdKQogICAgdHhuIEdyb3VwSW5kZXgKICAgIGludGNfMCAvLyAxCiAgICAtCiAgICBkdXAKICAgIGd0eG5zIFR5cGVFbnVtCiAgICBpbnRjXzAgLy8gcGF5CiAgICA9PQogICAgYXNzZXJ0IC8vIHRyYW5zYWN0aW9uIHR5cGUgaXMgcGF5CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxNgogICAgLy8gYXNzZXJ0IHBheV90eG4ucmVjZWl2ZXIgPT0gR2xvYmFsLmN1cnJlbnRfYXBwbGljYXRpb25fYWRkcmVzcywgIlJlY2VpdmVyIG11c3QgYmUgdGhlIGNvbnRyYWN0IGFkZHJlc3MiCiAgICBkdXAKICAgIGd0eG5zIFJlY2VpdmVyCiAgICBnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwogICAgPT0KICAgIGFzc2VydCAvLyBSZWNlaXZlciBtdXN0IGJlIHRoZSBjb250cmFjdCBhZGRyZXNzCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxNwogICAgLy8gYXNzZXJ0IHBheV90eG4uYW1vdW50ID4gMCwgIkRlcG9zaXQgYW1vdW50IG11c3QgYmUgZ3JlYXRlciB0aGFuIHplcm8iCiAgICBkdXAKICAgIGd0eG5zIEFtb3VudAogICAgZHVwCiAgICBjb3ZlciAyCiAgICBhc3NlcnQgLy8gRGVwb3NpdCBhbW91bnQgbXVzdCBiZSBncmVhdGVyIHRoYW4gemVybwogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MTkKICAgIC8vIGFtb3VudCwgZXhpc3RzID0gc2VsZi5kZXBvc2l0cy5tYXliZShwYXlfdHhuLnNlbmRlcikKICAgIGd0eG5zIFNlbmRlcgogICAgZHVwCiAgICBib3hfZ2V0CiAgICBzd2FwCiAgICBidG9pCiAgICBzd2FwCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyMAogICAgLy8gaWYgZXhpc3RzOgogICAgYnogZGVwb3NpdF9lbHNlX2JvZHlAMwogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjEKICAgIC8vIHNlbGYuZGVwb3NpdHNbcGF5X3R4bi5zZW5kZXJdID0gYW1vdW50ICsgcGF5X3R4bi5hbW91bnQKICAgIGR1cAogICAgZGlnIDMKICAgICsKICAgIGl0b2IKICAgIGRpZyAyCiAgICBzd2FwCiAgICBib3hfcHV0CgpkZXBvc2l0X2FmdGVyX2lmX2Vsc2VANDoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjI1CiAgICAvLyBzZWxmLnRvdGFsX2RlcG9zaXQgKz0gcGF5X3R4bi5hbW91bnQKICAgIGludGNfMSAvLyAwCiAgICBieXRlY18wIC8vICJ0b3RhbF9kZXBvc2l0IgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLnRvdGFsX2RlcG9zaXQgZXhpc3RzCiAgICBkaWcgMwogICAgKwogICAgYnl0ZWNfMCAvLyAidG90YWxfZGVwb3NpdCIKICAgIHN3YXAKICAgIGFwcF9nbG9iYWxfcHV0CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyNgogICAgLy8gcmV0dXJuIHNlbGYuZGVwb3NpdHNbcGF5X3R4bi5zZW5kZXJdCiAgICBkaWcgMQogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuZGVwb3NpdHMgZW50cnkgZXhpc3RzCiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxMwogICAgLy8gQGFiaW1ldGhvZCgpCiAgICBpdG9iCiAgICBieXRlY18xIC8vIDB4MTUxZjdjNzUKICAgIHN3YXAKICAgIGNvbmNhdAogICAgbG9nCiAgICBpbnRjXzAgLy8gMQogICAgcmV0dXJuCgpkZXBvc2l0X2Vsc2VfYm9keUAzOgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjMKICAgIC8vIHNlbGYuZGVwb3NpdHNbcGF5X3R4bi5zZW5kZXJdID0gcGF5X3R4bi5hbW91bnQKICAgIGRpZyAyCiAgICBpdG9iCiAgICBkaWcgMgogICAgc3dhcAogICAgYm94X3B1dAogICAgYiBkZXBvc2l0X2FmdGVyX2lmX2Vsc2VANAoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5iYW5rLmNvbnRyYWN0LkJhbmsud2l0aGRyYXdbcm91dGluZ10oKSAtPiB2b2lkOgp3aXRoZHJhdzoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjI4CiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGR1cAogICAgbGVuCiAgICBwdXNoaW50IDggLy8gOAogICAgPT0KICAgIGFzc2VydCAvLyBpbnZhbGlkIG51bWJlciBvZiBieXRlcyBmb3IgdWludDY0CiAgICBidG9pCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTozMQogICAgLy8gY3VycmVudCwgZXhpc3RzID0gc2VsZi5kZXBvc2l0cy5tYXliZShUeG4uc2VuZGVyKQogICAgdHhuIFNlbmRlcgogICAgYm94X2dldAogICAgc3dhcAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MzIKICAgIC8vIGFzc2VydCBleGlzdHMsICJObyBkZXBvc2l0cyBmb3VuZCBmb3IgdGhpcyBhY2NvdW50IgogICAgc3dhcAogICAgYXNzZXJ0IC8vIE5vIGRlcG9zaXRzIGZvdW5kIGZvciB0aGlzIGFjY291bnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjMzCiAgICAvLyBhc3NlcnQgYW1vdW50ID4gMCwgIldpdGhkcmF3YWwgYW1vdW50IG11c3QgYmUgZ3JlYXRlciB0aGFuIHplcm8iCiAgICBkaWcgMQogICAgYXNzZXJ0IC8vIFdpdGhkcmF3YWwgYW1vdW50IG11c3QgYmUgZ3JlYXRlciB0aGFuIHplcm8KICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjM0CiAgICAvLyBhc3NlcnQgYW1vdW50IDw9IGN1cnJlbnQsICJXaXRoZHJhd2FsIGFtb3VudCBleGNlZWRzIGJhbGFuY2UiCiAgICBkdXAyCiAgICA8PQogICAgYXNzZXJ0IC8vIFdpdGhkcmF3YWwgYW1vdW50IGV4Y2VlZHMgYmFsYW5jZQogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MzYKICAgIC8vIGl0eG4uUGF5bWVudChyZWNlaXZlcj1UeG4uc2VuZGVyLCBhbW91bnQ9YW1vdW50LCBmZWU9MCkuc3VibWl0KCkKICAgIGl0eG5fYmVnaW4KICAgIHR4biBTZW5kZXIKICAgIGRpZyAyCiAgICBpdHhuX2ZpZWxkIEFtb3VudAogICAgaXR4bl9maWVsZCBSZWNlaXZlcgogICAgaW50Y18wIC8vIHBheQogICAgaXR4bl9maWVsZCBUeXBlRW51bQogICAgaW50Y18xIC8vIDAKICAgIGl0eG5fZmllbGQgRmVlCiAgICBpdHhuX3N1Ym1pdAogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MzgKICAgIC8vIHJlbWFpbmluZyA9IGN1cnJlbnQgLSBhbW91bnQKICAgIHN3YXAKICAgIC0KICAgIGR1cAogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MzkKICAgIC8vIGlmIHJlbWFpbmluZyA9PSBVSW50NjQoMCk6CiAgICBibnogd2l0aGRyYXdfZWxzZV9ib2R5QDQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjQwCiAgICAvLyBkZWwgc2VsZi5kZXBvc2l0c1tUeG4uc2VuZGVyXQogICAgdHhuIFNlbmRlcgogICAgYm94X2RlbAogICAgcG9wCgp3aXRoZHJhd19hZnRlcl9pZl9lbHNlQDU6CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyOAogICAgLy8gQGFiaW1ldGhvZCgpCiAgICBkdXAKICAgIGl0b2IKICAgIGJ5dGVjXzEgLy8gMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCndpdGhkcmF3X2Vsc2VfYm9keUA0OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NDIKICAgIC8vIHNlbGYuZGVwb3NpdHNbVHhuLnNlbmRlcl0gPSByZW1haW5pbmcKICAgIHR4biBTZW5kZXIKICAgIGRpZyAxCiAgICBpdG9iCiAgICBib3hfcHV0CiAgICBiIHdpdGhkcmF3X2FmdGVyX2lmX2Vsc2VANQo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDExCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMSAvLyAxCiAgICByZXR1cm4K"},"byteCode":{"approval":"CyACAQAmAg10b3RhbF9kZXBvc2l0BBUffHUxGEAAAygjZzEbQQAdMRkURDEYRIICBJ9ZfDIEMSFBdjYaAI4CAAkAYQAxGRQxGBQQQzYaAUkjWYECCEwVEkQxFiIJSTgQIhJESTgHMgoSREk4CElOAkQ4AEm+TBdMQQAfSUsDCBZLAky/IyhlREsDCChMZ0sBvkQXFilMULAiQ0sCFksCTL9C/+A2GgFJFYEIEkQXMQC+TBdMREsBREoORLExAEsCsgiyByKyECOyAbNMCUlAAAwxALxISRYpTFCwIkMxAEsBFr9C/+8=","clear":"C4EBQw=="},"compilerInfo":{"compiler":"puya","compilerVersion":{"major":5,"minor":2,"patch":0}},"events":[],"templateVariables":{}} as unknown as Arc56Contract
+export const APP_SPEC: Arc56Contract = {"name":"Bank","structs":{},"methods":[{"name":"deposit","args":[{"type":"string","name":"memo"},{"type":"pay","name":"pay_txn"}],"returns":{"type":"uint64"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"desc":"Accepts a payment into the app escrow and records sender's deposited balance","events":[],"recommendations":{}},{"name":"withdraw","args":[{"type":"uint64","name":"amount"},{"type":"account","name":"receiver"}],"returns":{"type":"uint64"},"actions":{"create":[],"call":["NoOp"]},"readonly":false,"desc":"Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)","events":[],"recommendations":{}}],"arcs":[22,28],"networks":{},"state":{"schema":{"global":{"ints":1,"bytes":0},"local":{"ints":0,"bytes":0}},"keys":{"global":{"total_deposit":{"keyType":"AVMString","valueType":"AVMUint64","key":"dG90YWxfZGVwb3NpdA=="}},"local":{},"box":{}},"maps":{"global":{},"local":{},"box":{"deposits":{"keyType":"address","valueType":"uint64","prefix":""}}}},"bareActions":{"create":["NoOp"],"call":[]},"sourceInfo":{"approval":{"sourceInfo":[{"pc":[149],"errorMessage":"Deposit amount must be greater than zero"},{"pc":[211],"errorMessage":"No deposits found for this account"},{"pc":[65,92],"errorMessage":"OnCompletion is not NoOp"},{"pc":[143],"errorMessage":"Receiver must be the contract address"},{"pc":[220],"errorMessage":"Withdrawal amount exceeds balance"},{"pc":[214],"errorMessage":"Withdrawal amount must be greater than zero"},{"pc":[130],"errorMessage":"can only call when creating"},{"pc":[68,95],"errorMessage":"can only call when not creating"},{"pc":[188],"errorMessage":"check self.deposits entry exists"},{"pc":[175,251],"errorMessage":"check self.total_deposit exists"},{"pc":[111],"errorMessage":"transaction type is pay"}],"pcOffsetMethod":"none"},"clear":{"sourceInfo":[],"pcOffsetMethod":"none"}},"source":{"approval":"I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBzbWFydF9jb250cmFjdHMuYmFuay5jb250cmFjdC5CYW5rLl9fYWxnb3B5X2VudHJ5cG9pbnRfd2l0aF9pbml0KCkgLT4gdWludDY0OgptYWluOgogICAgaW50Y2Jsb2NrIDEgMAogICAgYnl0ZWNibG9jayAidG90YWxfZGVwb3NpdCIgMHgxNTFmN2M3NQogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGJueiBtYWluX2FmdGVyX2lmX2Vsc2VAMgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MTEKICAgIC8vIHNlbGYudG90YWxfZGVwb3NpdCA9IFVJbnQ2NCgwKQogICAgYnl0ZWNfMCAvLyAidG90YWxfZGVwb3NpdCIKICAgIGludGNfMSAvLyAwCiAgICBhcHBfZ2xvYmFsX3B1dAoKbWFpbl9hZnRlcl9pZl9lbHNlQDI6CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTo1CiAgICAvLyBjbGFzcyBCYW5rKEFSQzRDb250cmFjdCk6CiAgICB0eG4gTnVtQXBwQXJncwogICAgYnogbWFpbl9iYXJlX3JvdXRpbmdANwogICAgcHVzaGJ5dGVzcyAweDlmNTk3YzMyIDB4YjhmZjIwN2MgLy8gbWV0aG9kICJkZXBvc2l0KHN0cmluZyxwYXkpdWludDY0IiwgbWV0aG9kICJ3aXRoZHJhdyh1aW50NjQsYWNjb3VudCl1aW50NjQiCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBtYWluX2RlcG9zaXRfcm91dGVANSBtYWluX3dpdGhkcmF3X3JvdXRlQDYKCm1haW5fYWZ0ZXJfaWZfZWxzZUA5OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NQogICAgLy8gY2xhc3MgQmFuayhBUkM0Q29udHJhY3QpOgogICAgaW50Y18xIC8vIDAKICAgIHJldHVybgoKbWFpbl93aXRoZHJhd19yb3V0ZUA2OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjgKICAgIC8vIEBhYmltZXRob2QoKQogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBpcyBub3QgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBjYW4gb25seSBjYWxsIHdoZW4gbm90IGNyZWF0aW5nCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTo1CiAgICAvLyBjbGFzcyBCYW5rKEFSQzRDb250cmFjdCk6CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBidG9pCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICBidG9pCiAgICB0eG5hcyBBY2NvdW50cwogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjgKICAgIC8vIEBhYmltZXRob2QoKQogICAgY2FsbHN1YiB3aXRoZHJhdwogICAgaXRvYgogICAgYnl0ZWNfMSAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgoKbWFpbl9kZXBvc2l0X3JvdXRlQDU6CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxMwogICAgLy8gQGFiaW1ldGhvZCgpCiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIG5vdCBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYXNzZXJ0IC8vIGNhbiBvbmx5IGNhbGwgd2hlbiBub3QgY3JlYXRpbmcKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjUKICAgIC8vIGNsYXNzIEJhbmsoQVJDNENvbnRyYWN0KToKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGV4dHJhY3QgMiAwCiAgICB0eG4gR3JvdXBJbmRleAogICAgaW50Y18wIC8vIDEKICAgIC0KICAgIGR1cAogICAgZ3R4bnMgVHlwZUVudW0KICAgIGludGNfMCAvLyBwYXkKICAgID09CiAgICBhc3NlcnQgLy8gdHJhbnNhY3Rpb24gdHlwZSBpcyBwYXkKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjEzCiAgICAvLyBAYWJpbWV0aG9kKCkKICAgIGNhbGxzdWIgZGVwb3NpdAogICAgaXRvYgogICAgYnl0ZWNfMSAvLyAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50Y18wIC8vIDEKICAgIHJldHVybgoKbWFpbl9iYXJlX3JvdXRpbmdANzoKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjUKICAgIC8vIGNsYXNzIEJhbmsoQVJDNENvbnRyYWN0KToKICAgIHR4biBPbkNvbXBsZXRpb24KICAgIGJueiBtYWluX2FmdGVyX2lmX2Vsc2VAOQogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgICEKICAgIGFzc2VydCAvLyBjYW4gb25seSBjYWxsIHdoZW4gY3JlYXRpbmcKICAgIGludGNfMCAvLyAxCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMuYmFuay5jb250cmFjdC5CYW5rLmRlcG9zaXQobWVtbzogYnl0ZXMsIHBheV90eG46IHVpbnQ2NCkgLT4gdWludDY0OgpkZXBvc2l0OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MTMtMTQKICAgIC8vIEBhYmltZXRob2QoKQogICAgLy8gZGVmIGRlcG9zaXQoc2VsZiwgbWVtbzogU3RyaW5nLCBwYXlfdHhuOiBndHhuLlBheW1lbnRUcmFuc2FjdGlvbikgLT4gVUludDY0OgogICAgcHJvdG8gMiAxCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxNgogICAgLy8gYXNzZXJ0IHBheV90eG4ucmVjZWl2ZXIgPT0gR2xvYmFsLmN1cnJlbnRfYXBwbGljYXRpb25fYWRkcmVzcywgIlJlY2VpdmVyIG11c3QgYmUgdGhlIGNvbnRyYWN0IGFkZHJlc3MiCiAgICBmcmFtZV9kaWcgLTEKICAgIGd0eG5zIFJlY2VpdmVyCiAgICBnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwogICAgPT0KICAgIGFzc2VydCAvLyBSZWNlaXZlciBtdXN0IGJlIHRoZSBjb250cmFjdCBhZGRyZXNzCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToxNwogICAgLy8gYXNzZXJ0IHBheV90eG4uYW1vdW50ID4gMCwgIkRlcG9zaXQgYW1vdW50IG11c3QgYmUgZ3JlYXRlciB0aGFuIHplcm8iCiAgICBmcmFtZV9kaWcgLTEKICAgIGd0eG5zIEFtb3VudAogICAgZHVwCiAgICBhc3NlcnQgLy8gRGVwb3NpdCBhbW91bnQgbXVzdCBiZSBncmVhdGVyIHRoYW4gemVybwogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MTkKICAgIC8vIGFtb3VudCwgZXhpc3RzID0gc2VsZi5kZXBvc2l0cy5tYXliZShwYXlfdHhuLnNlbmRlcikKICAgIGZyYW1lX2RpZyAtMQogICAgZ3R4bnMgU2VuZGVyCiAgICBkdXAKICAgIGJveF9nZXQKICAgIHN3YXAKICAgIGJ0b2kKICAgIHN3YXAKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjIwCiAgICAvLyBpZiBleGlzdHM6CiAgICBieiBkZXBvc2l0X2Vsc2VfYm9keUAyCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyMQogICAgLy8gc2VsZi5kZXBvc2l0c1twYXlfdHhuLnNlbmRlcl0gPSBhbW91bnQgKyBwYXlfdHhuLmFtb3VudAogICAgZnJhbWVfZGlnIDIKICAgIGZyYW1lX2RpZyAwCiAgICArCiAgICBpdG9iCiAgICBmcmFtZV9kaWcgMQogICAgc3dhcAogICAgYm94X3B1dAoKZGVwb3NpdF9hZnRlcl9pZl9lbHNlQDM6CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyNQogICAgLy8gc2VsZi50b3RhbF9kZXBvc2l0ICs9IHBheV90eG4uYW1vdW50CiAgICBpbnRjXzEgLy8gMAogICAgYnl0ZWNfMCAvLyAidG90YWxfZGVwb3NpdCIKICAgIGFwcF9nbG9iYWxfZ2V0X2V4CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi50b3RhbF9kZXBvc2l0IGV4aXN0cwogICAgZnJhbWVfZGlnIDAKICAgICsKICAgIGJ5dGVjXzAgLy8gInRvdGFsX2RlcG9zaXQiCiAgICBzd2FwCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjYKICAgIC8vIHJldHVybiBzZWxmLmRlcG9zaXRzW3BheV90eG4uc2VuZGVyXQogICAgZnJhbWVfZGlnIDEKICAgIGJveF9nZXQKICAgIHN3YXAKICAgIGJ0b2kKICAgIHN3YXAKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLmRlcG9zaXRzIGVudHJ5IGV4aXN0cwogICAgZnJhbWVfYnVyeSAwCiAgICByZXRzdWIKCmRlcG9zaXRfZWxzZV9ib2R5QDI6CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weToyMwogICAgLy8gc2VsZi5kZXBvc2l0c1twYXlfdHhuLnNlbmRlcl0gPSBwYXlfdHhuLmFtb3VudAogICAgZnJhbWVfZGlnIDAKICAgIGl0b2IKICAgIGZyYW1lX2RpZyAxCiAgICBzd2FwCiAgICBib3hfcHV0CiAgICBiIGRlcG9zaXRfYWZ0ZXJfaWZfZWxzZUAzCgoKLy8gc21hcnRfY29udHJhY3RzLmJhbmsuY29udHJhY3QuQmFuay53aXRoZHJhdyhhbW91bnQ6IHVpbnQ2NCwgcmVjZWl2ZXI6IGJ5dGVzKSAtPiB1aW50NjQ6CndpdGhkcmF3OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MjgtMjkKICAgIC8vIEBhYmltZXRob2QoKQogICAgLy8gZGVmIHdpdGhkcmF3KHNlbGYsIGFtb3VudDogVUludDY0LCByZWNlaXZlcjogQWNjb3VudCkgLT4gVUludDY0OgogICAgcHJvdG8gMiAxCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTozMQogICAgLy8gY3VycmVudCwgZXhpc3RzID0gc2VsZi5kZXBvc2l0cy5tYXliZShUeG4uc2VuZGVyKQogICAgdHhuIFNlbmRlcgogICAgYm94X2dldAogICAgc3dhcAogICAgYnRvaQogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6MzIKICAgIC8vIGFzc2VydCBleGlzdHMsICJObyBkZXBvc2l0cyBmb3VuZCBmb3IgdGhpcyBhY2NvdW50IgogICAgc3dhcAogICAgYXNzZXJ0IC8vIE5vIGRlcG9zaXRzIGZvdW5kIGZvciB0aGlzIGFjY291bnQKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjMzCiAgICAvLyBhc3NlcnQgYW1vdW50ID4gMCwgIldpdGhkcmF3YWwgYW1vdW50IG11c3QgYmUgZ3JlYXRlciB0aGFuIHplcm8iCiAgICBmcmFtZV9kaWcgLTIKICAgIGFzc2VydCAvLyBXaXRoZHJhd2FsIGFtb3VudCBtdXN0IGJlIGdyZWF0ZXIgdGhhbiB6ZXJvCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTozNAogICAgLy8gYXNzZXJ0IGFtb3VudCA8PSBjdXJyZW50LCAiV2l0aGRyYXdhbCBhbW91bnQgZXhjZWVkcyBiYWxhbmNlIgogICAgZnJhbWVfZGlnIC0yCiAgICBkaWcgMQogICAgPD0KICAgIGFzc2VydCAvLyBXaXRoZHJhd2FsIGFtb3VudCBleGNlZWRzIGJhbGFuY2UKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjM2CiAgICAvLyBpdHhuLlBheW1lbnQocmVjZWl2ZXI9cmVjZWl2ZXIsIGFtb3VudD1hbW91bnQsIGZlZT0wKS5zdWJtaXQoKQogICAgaXR4bl9iZWdpbgogICAgZnJhbWVfZGlnIC0yCiAgICBpdHhuX2ZpZWxkIEFtb3VudAogICAgZnJhbWVfZGlnIC0xCiAgICBpdHhuX2ZpZWxkIFJlY2VpdmVyCiAgICBpbnRjXzAgLy8gcGF5CiAgICBpdHhuX2ZpZWxkIFR5cGVFbnVtCiAgICBpbnRjXzEgLy8gMAogICAgaXR4bl9maWVsZCBGZWUKICAgIGl0eG5fc3VibWl0CiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTozOAogICAgLy8gcmVtYWluaW5nID0gY3VycmVudCAtIGFtb3VudAogICAgZnJhbWVfZGlnIC0yCiAgICAtCiAgICBkdXAKICAgIC8vIHNtYXJ0X2NvbnRyYWN0cy9iYW5rL2NvbnRyYWN0LnB5OjM5CiAgICAvLyBpZiByZW1haW5pbmcgPT0gVUludDY0KDApOgogICAgYm56IHdpdGhkcmF3X2Vsc2VfYm9keUAzCiAgICAvLyBzbWFydF9jb250cmFjdHMvYmFuay9jb250cmFjdC5weTo0MAogICAgLy8gZGVsIHNlbGYuZGVwb3NpdHNbVHhuLnNlbmRlcl0KICAgIHR4biBTZW5kZXIKICAgIGJveF9kZWwKICAgIHBvcAoKd2l0aGRyYXdfYWZ0ZXJfaWZfZWxzZUA0OgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NDQKICAgIC8vIHNlbGYudG90YWxfZGVwb3NpdCAtPSBhbW91bnQKICAgIGludGNfMSAvLyAwCiAgICBieXRlY18wIC8vICJ0b3RhbF9kZXBvc2l0IgogICAgYXBwX2dsb2JhbF9nZXRfZXgKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLnRvdGFsX2RlcG9zaXQgZXhpc3RzCiAgICBmcmFtZV9kaWcgLTIKICAgIC0KICAgIGJ5dGVjXzAgLy8gInRvdGFsX2RlcG9zaXQiCiAgICBzd2FwCiAgICBhcHBfZ2xvYmFsX3B1dAogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NDUKICAgIC8vIHJldHVybiByZW1haW5pbmcKICAgIGZyYW1lX2RpZyAwCiAgICBzd2FwCiAgICByZXRzdWIKCndpdGhkcmF3X2Vsc2VfYm9keUAzOgogICAgLy8gc21hcnRfY29udHJhY3RzL2JhbmsvY29udHJhY3QucHk6NDIKICAgIC8vIHNlbGYuZGVwb3NpdHNbVHhuLnNlbmRlcl0gPSByZW1haW5pbmcKICAgIHR4biBTZW5kZXIKICAgIGZyYW1lX2RpZyAwCiAgICBpdG9iCiAgICBib3hfcHV0CiAgICBiIHdpdGhkcmF3X2FmdGVyX2lmX2Vsc2VANAo=","clear":"I3ByYWdtYSB2ZXJzaW9uIDEwCiNwcmFnbWEgdHlwZXRyYWNrIGZhbHNlCgovLyBhbGdvcHkuYXJjNC5BUkM0Q29udHJhY3QuY2xlYXJfc3RhdGVfcHJvZ3JhbSgpIC0+IHVpbnQ2NDoKbWFpbjoKICAgIHB1c2hpbnQgMSAvLyAxCiAgICByZXR1cm4K"},"byteCode":{"approval":"CiACAQAmAg10b3RhbF9kZXBvc2l0BBUffHUxGEAAAygjZzEbQQBTggIEn1l8MgS4/yB8NhoAjgIAHQACI0MxGRREMRhENhoBFzYaAhfAHIgAeBYpTFCwIkMxGRREMRhENhoBVwIAMRYiCUk4ECISRIgAEhYpTFCwIkMxGUD/vTEYFEQiQ4oCAYv/OAcyChJEi/84CElEi/84AEm+TBdMQQAeiwKLAAgWiwFMvyMoZUSLAAgoTGeLAb5MF0xEjACJiwAWiwFMv0L/4ooCATEAvkwXTESL/kSL/ksBDkSxi/6yCIv/sgcishAjsgGzi/4JSUAAEjEAvEgjKGVEi/4JKExniwBMiTEAiwAWv0L/6Q==","clear":"CoEBQw=="},"compilerInfo":{"compiler":"puya","compilerVersion":{"major":4,"minor":7,"patch":0}},"events":[],"templateVariables":{}} as unknown as Arc56Contract
 
 /**
  * A state record containing binary data
@@ -75,8 +75,9 @@ export type BankArgs = {
       memo: string
       payTxn: AppMethodCallTransactionArgument
     }
-    'withdraw(uint64)uint64': {
+    'withdraw(uint64,account)uint64': {
       amount: bigint | number
+      receiver: Uint8Array | string
     }
   }
   /**
@@ -84,7 +85,7 @@ export type BankArgs = {
    */
   tuple: {
     'deposit(string,pay)uint64': [memo: string, payTxn: AppMethodCallTransactionArgument]
-    'withdraw(uint64)uint64': [amount: bigint | number]
+    'withdraw(uint64,account)uint64': [amount: bigint | number, receiver: Uint8Array | string]
   }
 }
 
@@ -93,7 +94,7 @@ export type BankArgs = {
  */
 export type BankReturns = {
   'deposit(string,pay)uint64': bigint
-  'withdraw(uint64)uint64': bigint
+  'withdraw(uint64,account)uint64': bigint
 }
 
 /**
@@ -109,10 +110,10 @@ export type BankTypes = {
       argsTuple: BankArgs['tuple']['deposit(string,pay)uint64']
       returns: BankReturns['deposit(string,pay)uint64']
     }>
-    & Record<'withdraw(uint64)uint64' | 'withdraw', {
-      argsObj: BankArgs['obj']['withdraw(uint64)uint64']
-      argsTuple: BankArgs['tuple']['withdraw(uint64)uint64']
-      returns: BankReturns['withdraw(uint64)uint64']
+    & Record<'withdraw(uint64,account)uint64' | 'withdraw', {
+      argsObj: BankArgs['obj']['withdraw(uint64,account)uint64']
+      argsTuple: BankArgs['tuple']['withdraw(uint64,account)uint64']
+      returns: BankReturns['withdraw(uint64,account)uint64']
     }>
   /**
    * Defines the shape of the state of the application.
@@ -207,18 +208,18 @@ export abstract class BankParamsFactory {
     }
   }
   /**
-   * Constructs a no op call for the withdraw(uint64)uint64 ABI method
+   * Constructs a no op call for the withdraw(uint64,account)uint64 ABI method
    *
-   * Sends ALGO back to the caller from their recorded balance
+   * Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)
    *
    * @param params Parameters for the call
    * @returns An `AppClientMethodCallParams` object for the call
    */
-  static withdraw(params: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
+  static withdraw(params: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']> & CallOnComplete): AppClientMethodCallParams & CallOnComplete {
     return {
       ...params,
-      method: 'withdraw(uint64)uint64' as const,
-      args: Array.isArray(params.args) ? params.args : [params.args.amount],
+      method: 'withdraw(uint64,account)uint64' as const,
+      args: Array.isArray(params.args) ? params.args : [params.args.amount, params.args.receiver],
     }
   }
 }
@@ -474,14 +475,14 @@ export class BankClient {
     },
 
     /**
-     * Makes a call to the Bank smart contract using the `withdraw(uint64)uint64` ABI method.
+     * Makes a call to the Bank smart contract using the `withdraw(uint64,account)uint64` ABI method.
      *
-     * Sends ALGO back to the caller from their recorded balance
+     * Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)
      *
      * @param params The params for the smart contract call
      * @returns The call params
      */
-    withdraw: (params: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    withdraw: (params: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       return this.appClient.params.call(BankParamsFactory.withdraw(params))
     },
 
@@ -514,14 +515,14 @@ export class BankClient {
     },
 
     /**
-     * Makes a call to the Bank smart contract using the `withdraw(uint64)uint64` ABI method.
+     * Makes a call to the Bank smart contract using the `withdraw(uint64,account)uint64` ABI method.
      *
-     * Sends ALGO back to the caller from their recorded balance
+     * Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)
      *
      * @param params The params for the smart contract call
      * @returns The call transaction
      */
-    withdraw: (params: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    withdraw: (params: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       return this.appClient.createTransaction.call(BankParamsFactory.withdraw(params))
     },
 
@@ -555,16 +556,16 @@ export class BankClient {
     },
 
     /**
-     * Makes a call to the Bank smart contract using the `withdraw(uint64)uint64` ABI method.
+     * Makes a call to the Bank smart contract using the `withdraw(uint64,account)uint64` ABI method.
      *
-     * Sends ALGO back to the caller from their recorded balance
+     * Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)
      *
      * @param params The params for the smart contract call
      * @returns The call result
      */
-    withdraw: async (params: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
+    withdraw: async (params: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']> & SendParams & {onComplete?: OnApplicationComplete.NoOpOC}) => {
       const result = await this.appClient.send.call(BankParamsFactory.withdraw(params))
-      return {...result, return: result.return as unknown as (undefined | BankReturns['withdraw(uint64)uint64'])}
+      return {...result, return: result.return as unknown as (undefined | BankReturns['withdraw(uint64,account)uint64'])}
     },
 
   }
@@ -644,11 +645,11 @@ export class BankClient {
         return this
       },
       /**
-       * Add a withdraw(uint64)uint64 method call against the Bank contract
+       * Add a withdraw(uint64,account)uint64 method call against the Bank contract
        */
-      withdraw(params: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
+      withdraw(params: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']> & {onComplete?: OnApplicationComplete.NoOpOC}) {
         promiseChain = promiseChain.then(async () => composer.addAppCallMethodCall(await client.params.withdraw(params)))
-        resultMappers.push((v) => client.decodeReturnValue('withdraw(uint64)uint64', v))
+        resultMappers.push((v) => client.decodeReturnValue('withdraw(uint64,account)uint64', v))
         return this
       },
       /**
@@ -698,15 +699,15 @@ export type BankComposer<TReturns extends [...any[]] = []> = {
   deposit(params?: CallParams<BankArgs['obj']['deposit(string,pay)uint64'] | BankArgs['tuple']['deposit(string,pay)uint64']>): BankComposer<[...TReturns, BankReturns['deposit(string,pay)uint64'] | undefined]>
 
   /**
-   * Calls the withdraw(uint64)uint64 ABI method.
+   * Calls the withdraw(uint64,account)uint64 ABI method.
    *
-   * Sends ALGO back to the caller from their recorded balance
+   * Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
    */
-  withdraw(params?: CallParams<BankArgs['obj']['withdraw(uint64)uint64'] | BankArgs['tuple']['withdraw(uint64)uint64']>): BankComposer<[...TReturns, BankReturns['withdraw(uint64)uint64'] | undefined]>
+  withdraw(params?: CallParams<BankArgs['obj']['withdraw(uint64,account)uint64'] | BankArgs['tuple']['withdraw(uint64,account)uint64']>): BankComposer<[...TReturns, BankReturns['withdraw(uint64,account)uint64'] | undefined]>
 
   /**
    * Makes a clear_state call to an existing instance of the Bank smart contract.

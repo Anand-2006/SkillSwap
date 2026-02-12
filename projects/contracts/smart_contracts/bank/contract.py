@@ -26,14 +26,14 @@ class Bank(ARC4Contract):
         return self.deposits[pay_txn.sender]
 
     @abimethod()
-    def withdraw(self, amount: UInt64) -> UInt64:
-        """Sends ALGO back to the caller from their recorded balance"""
+    def withdraw(self, amount: UInt64, receiver: Account) -> UInt64:
+        """Sends ALGO to a specified receiver from the caller's recorded balance (Escrow Release)"""
         current, exists = self.deposits.maybe(Txn.sender)
         assert exists, "No deposits found for this account"
         assert amount > 0, "Withdrawal amount must be greater than zero"
         assert amount <= current, "Withdrawal amount exceeds balance"
 
-        itxn.Payment(receiver=Txn.sender, amount=amount, fee=0).submit()
+        itxn.Payment(receiver=receiver, amount=amount, fee=0).submit()
 
         remaining = current - amount
         if remaining == UInt64(0):
@@ -41,6 +41,5 @@ class Bank(ARC4Contract):
         else:
             self.deposits[Txn.sender] = remaining
 
+        self.total_deposit -= amount
         return remaining
-
-

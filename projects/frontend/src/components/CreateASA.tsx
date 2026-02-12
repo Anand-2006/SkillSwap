@@ -56,97 +56,121 @@ const CreateASA = ({ openModal, closeModal }: CreateASAProps) => {
 
   return (
     <dialog id="create_asa_modal" className={`modal ${openModal ? 'modal-open' : ''}`}>
-      <div className="modal-box glass-card bg-slate-900/95 border-white/10 p-0 overflow-hidden max-w-lg">
-        <div className="p-8">
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h3 className="text-2xl font-bold text-white">Create Asset</h3>
-              <p className="text-slate-400 text-sm mt-1">Deploy a new fungible token (ASA)</p>
-            </div>
-            <button
-              onClick={closeModal}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+      <div className="modal-box bg-zinc-950 border border-zinc-800 p-0 overflow-hidden max-w-xl shadow-2xl rounded-md flex flex-col">
 
-          <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Header */}
+        <div className="p-6 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold text-zinc-50 flex items-center gap-2 tracking-tight">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+              Create Protocol Asset
+            </h3>
+            <p className="text-[10px] text-zinc-500 font-mono font-bold mt-0.5 uppercase tracking-widest">Protocol // ASA_FORGE_V1</p>
+          </div>
+          <button
+            onClick={closeModal}
+            className="text-zinc-600 hover:text-white transition-all w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-sm"
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        {/* Form Body */}
+        <div className="p-8 space-y-8 bg-zinc-950">
+          <div className="grid grid-cols-2 gap-8">
             <div className="col-span-2">
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Asset Name</label>
+              <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 font-mono">Asset Nomenclature</label>
               <input
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                placeholder="e.g. Algorand Governance"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-sm px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:border-indigo-600/50 transition-all font-medium"
+                placeholder="e.g. SkillSwap Governance"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+              <p className="text-[9px] text-zinc-600 mt-2 font-mono uppercase font-bold">The primary identifier for the ledger asset.</p>
             </div>
+
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Unit Name</label>
+              <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 font-mono">Symbol // Ticker</label>
               <input
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold"
-                placeholder="e.g. ALGO"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-sm px-4 py-3 text-sm font-bold text-white placeholder:text-zinc-800 focus:outline-none focus:border-indigo-600/50 transition-all uppercase tracking-widest"
+                placeholder="e.g. SKIL"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
               />
             </div>
+
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Decimals</label>
+              <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 font-mono">Precision [Decimals]</label>
               <input
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-sm px-4 py-3 text-sm font-mono font-bold text-white placeholder:text-zinc-800 focus:outline-none focus:border-indigo-600/50 transition-all"
                 placeholder="6"
                 value={decimals}
                 onChange={(e) => setDecimals(e.target.value)}
               />
             </div>
+
             <div className="col-span-2">
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 ml-1">Total Supply (Base Units)</label>
-              <input
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold text-lg"
-                placeholder="1000000"
-                value={total}
-                onChange={(e) => setTotal(e.target.value)}
-              />
-              <p className="text-slate-500 text-xs mt-2 ml-1">
-                Note: Total is in base units. For 1 token with 6 decimals, enter 1,000,000.
-              </p>
+              <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 font-mono">Total Liquidity [Base Units]</label>
+              <div className="relative">
+                <input
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-sm px-4 py-4 text-2xl font-mono font-bold text-white placeholder:text-zinc-800 focus:outline-none focus:border-indigo-600/50 transition-all"
+                  placeholder="1,000,000"
+                  value={total}
+                  onChange={(e) => setTotal(e.target.value)}
+                />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                  <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-mono">{unit || 'TOKEN'}</span>
+                </div>
+              </div>
+              <div className="bg-zinc-900 border border-zinc-800 rounded p-4 mt-6">
+                <p className="text-[10px] text-zinc-500 font-mono leading-relaxed font-bold">
+                  <span className="text-zinc-400">MANIFEST:</span> Supply is defined in base units. For 1 full token with {decimals || '0'} decimals, provide {Math.pow(10, Number(decimals || 0)).toLocaleString()} as input.
+                </p>
+              </div>
             </div>
           </div>
 
-          <button
-            className={`btn-premium w-full flex items-center justify-center gap-2 ${loading ? 'opacity-80' : ''}`}
-            onClick={onCreate}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating Asset...
-              </>
-            ) : (
-              'Initialize Asset'
-            )}
-          </button>
+          <div className="pt-4">
+            <button
+              className={`w-full py-4 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-sm active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30`}
+              onClick={onCreate}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="w-1.5 h-1.5 bg-white animate-ping rounded-full"></span>
+                  FORGING PROTOCOL ASSET...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                  INITIALIZE NETWORK ASSET
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white/5 p-4 border-t border-white/5 flex justify-end">
+        {/* Footer Area */}
+        <div className="bg-zinc-900 p-6 border-t border-zinc-800 flex justify-between items-center px-8">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest font-bold">Verification Engine Ready</span>
+          </div>
           <button
-            className="px-6 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+            className="text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-all"
             onClick={closeModal}
             disabled={loading}
           >
-            Cancel
+            Abort Operation
           </button>
         </div>
       </div>
+      <form method="dialog" className="modal-backdrop bg-zinc-950/80">
+        <button onClick={closeModal}>close</button>
+      </form>
     </dialog>
   )
 }
 
 export default CreateASA
-

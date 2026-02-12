@@ -3,9 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --primary: 79 70 229;
+        /* indigo-600 */
+        --background: 9 9 11;
+        /* zinc-950 */
+        --surface: 24 24 27;
+        /* zinc-900 */
+        --border: 39 39 42;
+        /* zinc-800 */
+        --muted: 161 161 170;
+        /* zinc-400 */
+    }
+
     body {
-        @apply antialiased text-slate-400 bg-[#0f172a];
-        /* Slate 900 */
+        @apply antialiased text-zinc-400 bg-zinc-950;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
@@ -15,83 +27,103 @@
     h4,
     h5,
     h6 {
-        @apply text-slate-100 tracking-tight font-medium;
+        @apply text-zinc-50 font-bold tracking-tight;
+    }
+
+    /* Monospace for numbers */
+    .font-mono {
+        font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     }
 }
 
 @layer components {
-
-    /* SaaS Card: Professional, minimal, subtle borders */
-    .card-premium {
-        @apply bg-[#1e293b]/50 border border-slate-700/50 rounded-lg shadow-sm backdrop-blur-sm transition-all duration-200;
+    .glass-card {
+        @apply bg-zinc-900 border border-zinc-800 rounded-md shadow-sm;
     }
 
-    .card-premium:hover {
-        @apply border-slate-600/50 shadow-md transform -translate-y-0.5;
+    .btn-premium {
+        @apply px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider rounded-md transition-all active:scale-[0.98];
     }
 
-    /* Primary Action: Muted, professional styling */
-    .btn-primary {
-        @apply px-4 py-2 bg-emerald-600/90 hover:bg-emerald-600 text-white text-sm font-medium rounded-[6px] shadow-sm transition-all duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-1 focus:ring-offset-[#0f172a];
-    }
-
-    /* Secondary Action: Subtle ghost/outline style */
     .btn-secondary {
-        @apply px-4 py-2 bg-transparent border border-slate-700/75 hover:border-slate-600 text-slate-300 hover:text-white text-sm font-medium rounded-[6px] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-slate-500/20;
+        @apply px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-md transition-all;
     }
 
-    /* Ghost Button (New) */
-    .btn-ghost {
-        @apply px-3 py-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 rounded-md transition-colors text-sm font-medium;
+    .btn-outline {
+        @apply px-4 py-2 bg-transparent border border-zinc-800 hover:bg-zinc-900 text-zinc-300 hover:text-white text-xs font-bold rounded-md transition-all;
     }
 
-    /* Form Inputs: Clean, low contrast until focused */
-    .input-field {
-        @apply w-full bg-[#1e293b]/50 border border-slate-700/75 rounded-[6px] px-3 py-2.5 text-slate-200 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-150;
+    .input-dark {
+        @apply bg-zinc-950 border border-zinc-800 rounded-md px-4 py-2 text-zinc-50 text-sm placeholder:text-zinc-700 focus:outline-none focus:border-indigo-600 transition-all font-mono;
     }
 
-    /* Data Table Row: Minimalist list view */
-    .table-row-premium {
-        @apply border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors duration-150 cursor-pointer;
+    .badge-solid {
+        @apply bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider;
     }
 
-    /* Badges: Muted, low saturation */
-    .badge-emerald {
-        @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 ring-1 ring-inset ring-emerald-500/10;
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
     }
 
-    .badge-slate {
-        @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800/50 text-slate-400 border border-slate-700/50;
+    .custom-scrollbar::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-zinc-800 rounded-full hover:bg-zinc-700;
     }
 }
 
-/* Scrollbar: Dark and subtle */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+@layer utilities {
+    .animate-in {
+        animation-duration: 300ms;
+        animation-fill-mode: both;
+    }
+
+    .fade-in {
+        animation-name: fadeIn;
+    }
+
+    .slide-in-from-bottom-4 {
+        animation-name: slideInFromBottom;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideInFromBottom {
+        from {
+            transform: translateY(0.5rem);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 }
 
-::-webkit-scrollbar-track {
-    @apply bg-[#0f172a];
+/* Backward compatibility for previous classes but updated to new theme */
+.border-border-dark {
+    @apply border-zinc-800;
 }
 
-::-webkit-scrollbar-thumb {
-    @apply bg-slate-800 rounded-full border-2 border-[#0f172a];
+.bg-background-dark {
+    @apply bg-zinc-950;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-700;
+.text-primary {
+    @apply text-indigo-500;
 }
 
-/* Custom Glow Effects */
-.glow-indigo {
-    background: radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.08) 0%, transparent 40%);
-}
-
-.glow-violet {
-    background: radial-gradient(circle at 20% 40%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
-}
-
-.border-subtle {
-    border-color: rgba(255, 255, 255, 0.08);
+.bg-primary {
+    @apply bg-indigo-600;
 }

@@ -67,7 +67,9 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider manager={walletManager}>
-        {!session ? <Auth onLogin={() => { }} /> : <Home />}
+        {/* Temporarily bypass login logic */}
+        {/* {!session ? <Auth onLogin={() => { }} /> : <Home />} */}
+        <Home />
       </WalletProvider>
     </SnackbarProvider>
   )

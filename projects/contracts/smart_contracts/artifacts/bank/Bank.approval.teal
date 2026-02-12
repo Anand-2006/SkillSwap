@@ -18,7 +18,7 @@ main_after_if_else@2:
     // class Bank(ARC4Contract):
     txn NumAppArgs
     bz main_bare_routing@7
-    pushbytess 0x9f597c32 0x31214176 // method "deposit(string,pay)uint64", method "withdraw(uint64)uint64"
+    pushbytess 0x9f597c32 0xb8ff207c // method "deposit(string,pay)uint64", method "withdraw(uint64,account)uint64"
     txna ApplicationArgs 0
     match main_deposit_route@5 main_withdraw_route@6
 
@@ -40,6 +40,9 @@ main_withdraw_route@6:
     // class Bank(ARC4Contract):
     txna ApplicationArgs 1
     btoi
+    txna ApplicationArgs 2
+    btoi
+    txnas Accounts
     // smart_contracts/bank/contract.py:28
     // @abimethod()
     callsub withdraw
@@ -169,12 +172,12 @@ deposit_else_body@2:
     b deposit_after_if_else@3
 
 
-// smart_contracts.bank.contract.Bank.withdraw(amount: uint64) -> uint64:
+// smart_contracts.bank.contract.Bank.withdraw(amount: uint64, receiver: bytes) -> uint64:
 withdraw:
     // smart_contracts/bank/contract.py:28-29
     // @abimethod()
-    // def withdraw(self, amount: UInt64) -> UInt64:
-    proto 1 1
+    // def withdraw(self, amount: UInt64, receiver: Account) -> UInt64:
+    proto 2 1
     // smart_contracts/bank/contract.py:31
     // current, exists = self.deposits.maybe(Txn.sender)
     txn Sender
@@ -187,20 +190,20 @@ withdraw:
     assert // No deposits found for this account
     // smart_contracts/bank/contract.py:33
     // assert amount > 0, "Withdrawal amount must be greater than zero"
-    frame_dig -1
+    frame_dig -2
     assert // Withdrawal amount must be greater than zero
     // smart_contracts/bank/contract.py:34
     // assert amount <= current, "Withdrawal amount exceeds balance"
-    frame_dig -1
+    frame_dig -2
     dig 1
     <=
     assert // Withdrawal amount exceeds balance
     // smart_contracts/bank/contract.py:36
-    // itxn.Payment(receiver=Txn.sender, amount=amount, fee=0).submit()
+    // itxn.Payment(receiver=receiver, amount=amount, fee=0).submit()
     itxn_begin
-    txn Sender
-    frame_dig -1
+    frame_dig -2
     itxn_field Amount
+    frame_dig -1
     itxn_field Receiver
     intc_0 // pay
     itxn_field TypeEnum
@@ -209,7 +212,7 @@ withdraw:
     itxn_submit
     // smart_contracts/bank/contract.py:38
     // remaining = current - amount
-    frame_dig -1
+    frame_dig -2
     -
     dup
     // smart_contracts/bank/contract.py:39
@@ -223,6 +226,17 @@ withdraw:
 
 withdraw_after_if_else@4:
     // smart_contracts/bank/contract.py:44
+    // self.total_deposit -= amount
+    intc_1 // 0
+    bytec_0 // "total_deposit"
+    app_global_get_ex
+    assert // check self.total_deposit exists
+    frame_dig -2
+    -
+    bytec_0 // "total_deposit"
+    swap
+    app_global_put
+    // smart_contracts/bank/contract.py:45
     // return remaining
     frame_dig 0
     swap

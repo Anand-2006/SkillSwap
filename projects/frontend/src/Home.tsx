@@ -10,399 +10,587 @@ import CreateASA from './components/CreateASA'
 import AssetOptIn from './components/AssetOptIn'
 import Bank from './components/Bank'
 import GPURental from './components/GPURental'
+import AboutSection from './components/AboutSection'
 
 const Home: React.FC = () => {
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
+  const [bankModal, setBankModal] = useState<boolean>(false)
   const [appCallsDemoModal, setAppCallsDemoModal] = useState<boolean>(false)
   const [sendAlgoModal, setSendAlgoModal] = useState<boolean>(false)
   const [mintNftModal, setMintNftModal] = useState<boolean>(false)
   const [createAsaModal, setCreateAsaModal] = useState<boolean>(false)
   const [assetOptInModal, setAssetOptInModal] = useState<boolean>(false)
-  const [bankModal, setBankModal] = useState<boolean>(false)
+  const [activeTab, setActiveTab] = useState<'marketplace' | 'pools' | 'gpu' | 'about'>('marketplace')
 
-  const [activeTab, setActiveTab] = useState<'marketplace' | 'pools' | 'gpu'>('marketplace')
+  // Proposed Escrow state for pre-filling the Bank modal
+  const [proposedEscrow, setProposedEscrow] = useState<{ amount: string; memo: string; receiver?: string } | null>(null)
+
+  // Filter States
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStacks, setSelectedStacks] = useState<string[]>([])
+  const [budgetRange, setBudgetRange] = useState(50)
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+
   const { activeAddress } = useWallet()
+
+  const handleTelemetry = () => {
+    import('notistack').then(({ enqueueSnackbar }) => {
+      enqueueSnackbar('Telemetry stream synchronized. Network latency: 42ms', { variant: 'info' })
+    })
+  }
+
+  const scrollToMarket = () => {
+    document.getElementById('task-grid')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const tasks = [
+    {
+      id: '#T001',
+      title: 'Fix Website UI + Mobile Responsiveness',
+      useCase: 'Improve accessibility and mobile UX',
+      description: 'Clean up layout issues, fix spacing/overflow bugs, and make key pages responsive on mobile devices.',
+      budget: 12,
+      duration: '~1-2 Days',
+      type: 'Frontend',
+      tech: ['React', 'CSS', 'Tailwind'],
+      status: 'active',
+      postedAt: '1h ago'
+    },
+    {
+      id: '#T002',
+      title: 'Debug CORS Issue in Node.js Backend',
+      useCase: 'Fix API communication errors',
+      description: 'Identify and fix CORS errors between frontend and backend; ensure proper headers and environment handling.',
+      budget: 18,
+      duration: '~1 Day',
+      type: 'Backend',
+      tech: ['Node.js', 'Express'],
+      status: 'active',
+      postedAt: '3h ago'
+    },
+    {
+      id: '#T003',
+      title: 'Scrape Data and Export to CSV',
+      useCase: 'Data collection for research',
+      description: 'Build a scraper that collects structured data, removes duplicates, and exports a cleaned CSV file.',
+      budget: 20,
+      duration: '~2 Days',
+      type: 'Automation',
+      tech: ['Python', 'BeautifulSoup'],
+      status: 'active',
+      postedAt: '5h ago'
+    },
+    {
+      id: '#T004',
+      title: 'Add Role-Based Access Control',
+      useCase: 'Enhance application security',
+      description: 'Implement admin/user roles and protect routes or APIs accordingly in the existing web application.',
+      budget: 28,
+      duration: '~2-3 Days',
+      type: 'Full Stack',
+      tech: ['SQL', 'Auth'],
+      status: 'active',
+      postedAt: '2h ago'
+    },
+    {
+      id: '#T005',
+      title: 'Optimize Slow API Endpoint',
+      useCase: 'Performance benchmarking',
+      description: 'Profile a slow API, improve database queries or caching (Redis/Postgres), and reduce response time.',
+      budget: 25,
+      duration: '~2 Days',
+      type: 'Backend',
+      tech: ['Postgres', 'Redis'],
+      status: 'active',
+      postedAt: '4h ago'
+    },
+    {
+      id: '#T006',
+      title: 'Implement Real-Time Updates',
+      useCase: 'Live dashboard functionality',
+      description: 'Add live updates to a dashboard or chat-like feature using WebSockets or polling.',
+      budget: 30,
+      duration: '~3 Days',
+      type: 'Full Stack',
+      tech: ['Socket.io', 'Node.js'],
+      status: 'active',
+      postedAt: '6h ago'
+    },
+    {
+      id: '#T007',
+      title: 'Deploy Full Stack App to VPS',
+      useCase: 'Production environment setup',
+      description: 'Set up backend, frontend build, environment variables, and reverse proxy (Nginx or similar).',
+      budget: 26,
+      duration: '~2 Days',
+      type: 'DevOps',
+      tech: ['Docker', 'Nginx', 'Cloud'],
+      status: 'active',
+      postedAt: '1d ago'
+    },
+    {
+      id: '#T008',
+      title: 'Build Admin Dashboard',
+      useCase: 'Internal data management',
+      description: 'Create a simple dashboard to view users/data and perform basic administrative actions.',
+      budget: 35,
+      duration: '~3-4 Days',
+      type: 'Full Stack',
+      tech: ['Next.js', 'Tailwind'],
+      status: 'active',
+      postedAt: '2d ago'
+    },
+    {
+      id: '#T009',
+      title: 'Write Unit Tests for Backend',
+      useCase: 'Code quality assurance',
+      description: 'Add meaningful tests (Jest/Supertest) for existing APIs and fix failing test cases.',
+      budget: 22,
+      duration: '~2 Days',
+      type: 'Backend',
+      tech: ['Jest', 'Testing'],
+      status: 'active',
+      postedAt: '3d ago'
+    },
+    {
+      id: '#T010',
+      title: 'Implement File Upload + Storage',
+      useCase: 'User content management',
+      description: 'Add file upload feature with validation and storage (S3 or local cloud bucket).',
+      budget: 28,
+      duration: '~2-3 Days',
+      type: 'Full Stack',
+      tech: ['Node.js', 'S3'],
+      status: 'active',
+      postedAt: '4d ago'
+    },
+    {
+      id: '#T011',
+      title: 'Auditorium Event Arrangements',
+      useCase: 'Campus event logistics',
+      description: 'Assist in stage setup, seating arrangement, and coordination before event start.',
+      budget: 24,
+      duration: '4-6 Hours',
+      type: 'Campus',
+      tech: ['Logistics', 'Events'],
+      status: 'active',
+      postedAt: '2h ago'
+    },
+    {
+      id: '#T012',
+      title: 'Design Posters for Club Event',
+      useCase: 'Creative marketing assets',
+      description: 'Create 2–3 posters for social media and print using Canva or Figma.',
+      budget: 18,
+      duration: '~1-2 Days',
+      type: 'Design',
+      tech: ['Figma', 'Creative'],
+      status: 'active',
+      postedAt: '5h ago'
+    },
+    {
+      id: '#T013',
+      title: 'Manage Registration Desk',
+      useCase: 'Event attendee check-in',
+      description: 'Handle attendee check-in and maintain list or QR scanning during the event.',
+      budget: 20,
+      duration: '3-5 Hours',
+      type: 'Campus',
+      tech: ['Organization', 'QR'],
+      status: 'active',
+      postedAt: '1d ago'
+    },
+    {
+      id: '#T014',
+      title: 'Photography for College Event',
+      useCase: 'Media coverage and highlights',
+      description: 'Capture photos during the event and share edited highlights for the gallery.',
+      budget: 30,
+      duration: '~1 Day',
+      type: 'Media',
+      tech: ['Editing', 'Media'],
+      status: 'active',
+      postedAt: '2d ago'
+    },
+    {
+      id: '#T015',
+      title: 'Decorate Seminar Hall',
+      useCase: 'Venue preparation',
+      description: 'Help with banners, lights, and table arrangement before the club activity starts.',
+      budget: 22,
+      duration: '3-4 Hours',
+      type: 'Campus',
+      tech: ['Layout', 'Design'],
+      status: 'active',
+      postedAt: '3h ago'
+    },
+    {
+      id: '#T016',
+      title: 'Build Simple Attendance Tracker',
+      useCase: 'Club administration tools',
+      description: 'Web or spreadsheet-based tool to track attendance automatically for club members.',
+      budget: 26,
+      duration: '~2-3 Days',
+      type: 'Tools',
+      tech: ['Sheets', 'Automation'],
+      status: 'active',
+      postedAt: '1h ago'
+    },
+    {
+      id: '#T017',
+      title: 'Convert Google Sheet to Web Tool',
+      useCase: 'Workflow optimization',
+      description: 'Turn a manual sheet-based process into a small form + dashboard web application.',
+      budget: 34,
+      duration: '~3-4 Days',
+      type: 'Full Stack',
+      tech: ['React', 'API'],
+      status: 'active',
+      postedAt: '4h ago'
+    },
+    {
+      id: '#T018',
+      title: 'Automate Form Notifications',
+      useCase: 'Communication automation',
+      description: 'Trigger email or WhatsApp messages when new form submissions happen.',
+      budget: 24,
+      duration: '~2 Days',
+      type: 'Automation',
+      tech: ['Twilio', 'Zapier'],
+      status: 'active',
+      postedAt: '5h ago'
+    }
+  ]
+
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStack = selectedStacks.length === 0 || selectedStacks.some(s => task.tech.includes(s))
+    const matchesBudget = task.budget <= budgetRange
+    const matchesType = !selectedType || task.type === selectedType
+    return matchesSearch && matchesStack && matchesBudget && matchesType
+  })
+
+  const resetFilters = () => {
+    setSearchTerm('')
+    setSelectedStacks([])
+    setBudgetRange(50)
+    setSelectedType(null)
+  }
+
+  const toggleStack = (stack: string) => {
+    setSelectedStacks(prev =>
+      prev.includes(stack) ? prev.filter(s => s !== stack) : [...prev, stack]
+    )
+  }
 
   const toggleWalletModal = () => setOpenWalletModal(!openWalletModal)
 
+  const handleHireAgent = (task: any) => {
+    setProposedEscrow({
+      amount: task.budget.toString(),
+      memo: task.id
+    })
+    setBankModal(true)
+  }
+
+  const handleInitEscrow = () => {
+    setProposedEscrow(null)
+    setBankModal(true)
+  }
+
   return (
-    <div className="dark text-slate-300 min-h-screen relative overflow-x-hidden antialiased bg-background-dark font-display selection:bg-primary/30">
+    <div className="dark text-zinc-400 min-h-screen relative antialiased bg-zinc-950 font-sans selection:bg-indigo-500/30">
 
-      {/* Glow Effects */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-3/4 h-3/4 glow-indigo"></div>
-        <div className="absolute bottom-0 left-0 w-3/4 h-3/4 glow-violet"></div>
-      </div>
-
-      <nav className="sticky top-0 z-50 border-b border-border-dark bg-black/80 backdrop-blur-md px-6 py-3">
+      <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900 px-6 py-3">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-primary/20 border border-primary/40 rounded flex items-center justify-center">
-              <span className="material-symbols-outlined text-primary text-sm">terminal</span>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('marketplace')}>
+            <div className="w-8 h-8 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-center">
+              <span className="material-symbols-outlined text-indigo-500 text-xl">terminal</span>
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white font-mono">SkillSwap<span className="text-slate-600">_Dev</span></span>
+            <span className="text-base font-bold tracking-tight text-white font-mono">SkillSwap<span className="text-indigo-400">.io</span></span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-[12px] font-medium text-slate-400">
-            <button onClick={() => setActiveTab('marketplace')} className={`transition-colors ${activeTab === 'marketplace' ? 'text-white' : 'hover:text-white'}`}>Marketplace</button>
-            <button onClick={() => setActiveTab('pools')} className={`transition-colors ${activeTab === 'pools' ? 'text-white' : 'hover:text-white'}`}>Compute Pools</button>
-            <button onClick={() => setActiveTab('gpu')} className={`transition-colors ${activeTab === 'gpu' ? 'text-white' : 'hover:text-white'}`}>GPU Rental</button>
-            <button className="hover:text-white transition-colors">Telemetry</button>
+          <div className="hidden md:flex items-center gap-8 text-[12px] font-medium text-zinc-400">
+            <button onClick={() => setActiveTab('marketplace')} className={`relative py-1 transition-all ${activeTab === 'marketplace' ? 'text-white' : 'hover:text-white'}`}>
+              Marketplace
+              {activeTab === 'marketplace' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-full"></span>}
+            </button>
+            <button onClick={() => setActiveTab('pools')} className={`relative py-1 transition-all ${activeTab === 'pools' ? 'text-white' : 'hover:text-white'}`}>
+              Compute Pools
+              {activeTab === 'pools' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-full"></span>}
+            </button>
+            <button onClick={() => setActiveTab('gpu')} className={`relative py-1 transition-all ${activeTab === 'gpu' ? 'text-white' : 'hover:text-white'}`}>
+              GPU Rental
+              {activeTab === 'gpu' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-full"></span>}
+            </button>
+            <button onClick={() => setActiveTab('about')} className={`relative py-1 transition-all ${activeTab === 'about' ? 'text-white' : 'hover:text-white'}`}>
+              About
+              {activeTab === 'about' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-full"></span>}
+            </button>
+            <button onClick={handleTelemetry} className="hover:text-white transition-colors">Telemetry</button>
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => import('./utils/supabaseClient').then(({ supabase }) => supabase.auth.signOut())}
-              className="hidden md:block text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors mr-2 font-mono"
-            >
-              Sign Out
-            </button>
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn-ghost text-zinc-500 hover:text-indigo-500 transition-all cursor-pointer">
+                <span className="material-symbols-outlined text-xl">settings</span>
+              </label>
+              <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-sm bg-zinc-950 border border-zinc-800 rounded-md w-52 mt-4">
+                <li><button onClick={() => setMintNftModal(true)} className="text-xs font-mono py-3 hover:bg-zinc-900 rounded-sm">Mint Artifact</button></li>
+                <li><button onClick={() => setCreateAsaModal(true)} className="text-xs font-mono py-3 hover:bg-zinc-900 rounded-sm">Create ASA</button></li>
+                <li><button onClick={() => setAssetOptInModal(true)} className="text-xs font-mono py-3 hover:bg-zinc-900 rounded-sm">Asset Opt-In</button></li>
+                <li><button onClick={() => setAppCallsDemoModal(true)} className="text-xs font-mono py-3 hover:bg-zinc-900 rounded-sm">App Registry</button></li>
+                <li><button onClick={() => setSendAlgoModal(true)} className="text-xs font-mono py-3 hover:bg-zinc-900 rounded-sm text-emerald-500 font-bold">Fast Payment</button></li>
+              </ul>
+            </div>
             <button
               onClick={toggleWalletModal}
-              className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded text-[11px] font-medium hover:bg-white/10 transition-all text-slate-300"
+              className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-md text-xs font-bold hover:bg-zinc-800 transition-all text-white shadow-sm"
             >
               {activeAddress ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="font-mono">{activeAddress.substring(0, 4)}...{activeAddress.substring(activeAddress.length - 4)}</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="font-mono">{activeAddress.substring(0, 6)}...{activeAddress.substring(activeAddress.length - 4)}</span>
                 </>
               ) : (
-                <span>Connect Wallet</span>
+                <>
+                  <span className="material-symbols-outlined text-sm">account_balance_wallet</span>
+                  Connect Wallet
+                </>
               )}
             </button>
           </div>
         </div>
       </nav>
 
-      <main className="relative z-10 max-w-[1600px] mx-auto px-6 pt-6 pb-12">
-        {activeTab === 'marketplace' && (
-          <>
-            <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-6 border-b border-border-dark pb-6">
-              <div className="max-w-2xl">
-                <h1 className="text-xl font-semibold tracking-tight text-white mb-1 flex items-center gap-2">
-                  Peer-to-Peer Task Escrow
-                  <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-mono border border-primary/20">v2.1.0</span>
-                </h1>
-                <p className="text-slate-500 text-xs font-mono">
-                  Secure pool funding via Algorand smart contracts. Autonomous release on verification.
-                </p>
+      <main className="relative z-10 max-w-[1600px] mx-auto px-6 pt-8 pb-12">
+        <div className="transition-all duration-300 ease-in-out">
+          {activeTab === 'marketplace' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-10 pb-8 border-b border-zinc-800">
+                <div className="max-w-2xl">
+                  <h1 className="text-3xl font-bold tracking-tighter text-zinc-50 mb-2 flex items-center gap-3">
+                    PEER TASK ESCROW
+                    <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 text-[10px] font-mono border border-zinc-700 tracking-wider">V2.0-STABLE</span>
+                  </h1>
+                  <p className="text-zinc-500 text-sm font-medium max-w-xl leading-relaxed">
+                    Deploy production-grade escrow contracts for decentralized collaboration.
+                    <span className="text-indigo-400/80 ml-1">Autonomous release upon verification.</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button onClick={scrollToMarket} className="btn-outline">
+                    Browse Tasks
+                  </button>
+                  <button onClick={handleInitEscrow} className="btn-premium flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">add_circle</span>
+                    Create New Pool
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <button className="px-4 py-2 bg-transparent border border-white/10 text-slate-300 text-xs font-medium rounded hover:bg-white/5 transition-colors">
-                  Browse Tasks
-                </button>
-                <button onClick={() => setBankModal(true)} className="px-4 py-2 bg-white text-black text-xs font-semibold rounded hover:bg-slate-200 transition-all flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm">add</span>
-                  Create Pool
-                </button>
-              </div>
-            </div>
 
-            <div className="flex flex-col lg:flex-row gap-6">
-              <aside className="w-full lg:w-60 shrink-0">
-                <div className="sticky top-20">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest font-mono">
-                      Filters
-                    </h2>
-                    <button className="text-[10px] text-primary hover:text-primary/80">Reset</button>
-                  </div>
-                  <div className="space-y-6">
+              <div className="flex flex-col lg:flex-row gap-10">
+                <aside className="w-full lg:w-64 shrink-0">
+                  <div className="sticky top-24 space-y-8">
                     <div>
-                      <div className="relative">
-                        <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600 text-sm">search</span>
-                        <input className="w-full bg-black border border-border-dark rounded pl-8 pr-3 py-1.5 text-xs focus:ring-1 focus:ring-primary/50 focus:border-primary/50 outline-none transition-all placeholder:text-slate-700 text-slate-300 font-mono" placeholder="Search tasks..." type="text" />
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Search Engine</h2>
+                        {(searchTerm || selectedStacks.length > 0 || budgetRange < 50 || selectedType) && (
+                          <button onClick={resetFilters} className="text-[10px] text-indigo-400 hover:underline font-bold uppercase tracking-widest">Reset</button>
+                        )}
+                      </div>
+                      <div className="relative group">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-lg transition-colors group-focus-within:text-indigo-500">search</span>
+                        <input
+                          className="w-full bg-zinc-950 border border-zinc-800 rounded-md pl-10 pr-4 py-3 text-xs focus:border-indigo-600 outline-none transition-all placeholder:text-zinc-800 text-zinc-50 font-mono"
+                          placeholder="Query tasks..."
+                          type="text"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                       </div>
                     </div>
-                    <div className="border-t border-border-dark pt-4">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block font-mono">Tech Stack</label>
-                      <div className="space-y-2">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <input className="w-3 h-3 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-black" type="checkbox" />
-                          <span className="text-[11px] text-slate-400 group-hover:text-white transition-colors">Rust / WASM</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <input defaultChecked className="w-3 h-3 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-black" type="checkbox" />
-                          <span className="text-[11px] text-slate-400 group-hover:text-white transition-colors">PyTeal</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <input className="w-3 h-3 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-black" type="checkbox" />
-                          <span className="text-[11px] text-slate-400 group-hover:text-white transition-colors">Reach</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <input className="w-3 h-3 rounded border-white/20 text-primary focus:ring-offset-0 focus:ring-0 bg-black" type="checkbox" />
-                          <span className="text-[11px] text-slate-400 group-hover:text-white transition-colors">React / TS</span>
-                        </label>
+
+                    <div className="pt-6 border-t border-zinc-800">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block font-mono">Tech Stack</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['React', 'Node.js', 'Python', 'SQL', 'Tailwind', 'Automation', 'Figma', 'Cloud'].map(stack => (
+                          <button
+                            key={stack}
+                            onClick={() => toggleStack(stack)}
+                            className={`px-3 py-2 rounded-md text-[10px] font-mono transition-all border ${selectedStacks.includes(stack)
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                              }`}
+                          >
+                            {stack}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    <div className="border-t border-border-dark pt-4">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block font-mono">Budget (ALGO)</label>
-                      <div className="space-y-3">
-                        <input className="w-full accent-white h-1 bg-white/10 rounded-lg appearance-none cursor-pointer" max="10000" min="0" type="range" />
-                        <div className="flex gap-2 font-mono">
-                          <div className="w-1/2 bg-black border border-border-dark rounded px-2 py-1 text-[10px] text-slate-400 flex items-center justify-between">
-                            <span>Min</span>
-                            <span className="text-white">0</span>
-                          </div>
-                          <div className="w-1/2 bg-black border border-border-dark rounded px-2 py-1 text-[10px] text-slate-400 flex items-center justify-between">
-                            <span>Max</span>
-                            <span className="text-white">10k</span>
-                          </div>
-                        </div>
+
+                    <div className="pt-6 border-t border-zinc-800">
+                      <div className="flex justify-between items-center mb-4">
+                        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-mono">Budget Cap</label>
+                        <span className="text-[10px] font-mono text-indigo-400 font-bold">{budgetRange} ALGO</span>
                       </div>
+                      <input
+                        className="w-full accent-indigo-600 h-1 bg-zinc-800 rounded-md appearance-none cursor-pointer"
+                        max="100"
+                        min="0"
+                        step="1"
+                        type="range"
+                        value={budgetRange}
+                        onChange={(e) => setBudgetRange(parseInt(e.target.value))}
+                      />
                     </div>
-                    <div className="border-t border-border-dark pt-4">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block font-mono">Type</label>
+
+                    <div className="pt-6 border-t border-zinc-800">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block font-mono">Project Type</label>
                       <div className="space-y-1">
-                        <button className="w-full text-left px-2 py-1.5 text-[11px] text-white bg-white/5 rounded border border-white/10 flex justify-between items-center group">
-                          Smart Contract
-                          <span className="text-[9px] text-slate-500 group-hover:text-white">12</span>
-                        </button>
-                        <button className="w-full text-left px-2 py-1.5 text-[11px] text-slate-400 hover:text-white hover:bg-white/5 rounded border border-transparent hover:border-white/10 transition-all flex justify-between items-center group">
-                          Frontend
-                          <span className="text-[9px] text-slate-600 group-hover:text-slate-400">8</span>
-                        </button>
-                        <button className="w-full text-left px-2 py-1.5 text-[11px] text-slate-400 hover:text-white hover:bg-white/5 rounded border border-transparent hover:border-white/10 transition-all flex justify-between items-center group">
-                          GPU Compute
-                          <span className="text-[9px] text-slate-600 group-hover:text-slate-400">5</span>
-                        </button>
+                        {['Frontend', 'Backend', 'Full Stack', 'Automation', 'Campus', 'Design', 'Media'].map(type => (
+                          <button
+                            key={type}
+                            onClick={() => setSelectedType(selectedType === type ? null : type)}
+                            className={`w-full text-left px-3 py-2.5 text-[11px] font-semibold rounded-md transition-all flex justify-between items-center group ${selectedType === type
+                              ? 'bg-zinc-800 text-zinc-50'
+                              : 'bg-transparent text-zinc-500 hover:bg-zinc-900'
+                              }`}
+                          >
+                            {type}
+                            <span className={`text-[9px] font-mono ${selectedType === type ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                              {tasks.filter(t => t.type === type).length}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </div>
-              </aside>
-              <div className="flex-1">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                </aside>
 
-                  <div className="bg-black border border-border-dark p-5 rounded-lg flex flex-col hover:border-primary/50 hover:bg-white/[0.02] transition-all duration-200 group relative shadow-sm hover:shadow-md cursor-pointer" onClick={() => setBankModal(true)}>
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="flex h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wide">ID: #8291</span>
-                    </div>
-                    <div className="mb-4">
-                      <h3 className="text-[15px] font-semibold text-white group-hover:text-primary transition-colors leading-tight mb-1">
-                        React Query Optimization for Data Stream
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-mono mb-2">Use case: Real-time dashboard performance</p>
-                      <p className="text-slate-400 text-xs leading-relaxed border-l-2 border-white/10 pl-3">
-                        Refactor existing fetch hooks to implement optimistic updates and infinite scrolling for the transaction feed.
-                      </p>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between py-3 border-t border-border-dark mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Budget</span>
-                          <span className="text-xs font-mono text-white">150 ALGO</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Est. Duration</span>
-                          <span className="text-xs font-mono text-slate-300">~2 Days</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col text-right">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Type</span>
-                          <span className="text-xs font-mono text-slate-300">Frontend</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">React</span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">TypeScript</span>
-                        <div className="ml-auto">
-                          <span className="text-[10px] text-slate-600 flex items-center gap-1 font-mono">
-                            <span className="material-symbols-outlined text-[12px]">schedule</span> 2h ago
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-black border border-border-dark p-5 rounded-lg flex flex-col hover:border-primary/50 hover:bg-white/[0.02] transition-all duration-200 group relative shadow-sm hover:shadow-md cursor-pointer" onClick={() => setBankModal(true)}>
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="flex h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wide">ID: #8294</span>
-                    </div>
-                    <div className="mb-4">
-                      <h3 className="text-[15px] font-semibold text-white group-hover:text-primary transition-colors leading-tight mb-1">
-                        PyTeal Escrow Smart Contract Audit
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-mono mb-2">Use case: Security verification for DeFi pool</p>
-                      <p className="text-slate-400 text-xs leading-relaxed border-l-2 border-white/10 pl-3">
-                        Comprehensive audit of TEAL bytecode logic to prevent re-entrancy attacks and ensure proper state management.
-                      </p>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between py-3 border-t border-border-dark mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Budget</span>
-                          <span className="text-xs font-mono text-white">300 ALGO</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Est. Duration</span>
-                          <span className="text-xs font-mono text-slate-300">~1 Week</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col text-right">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Type</span>
-                          <span className="text-xs font-mono text-slate-300">Security</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">PyTeal</span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">Algorand</span>
-                        <div className="ml-auto">
-                          <span className="text-[10px] text-slate-600 flex items-center gap-1 font-mono">
-                            <span className="material-symbols-outlined text-[12px]">schedule</span> 5h ago
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-black border border-border-dark p-5 rounded-lg flex flex-col hover:border-primary/50 hover:bg-white/[0.02] transition-all duration-200 group relative shadow-sm hover:shadow-md cursor-pointer" onClick={() => setBankModal(true)}>
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="flex h-2 w-2 rounded-full bg-amber-500 ring-4 ring-amber-500/20"></span>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wide">ID: #8288</span>
-                    </div>
-                    <div className="mb-4">
-                      <h3 className="text-[15px] font-semibold text-white group-hover:text-primary transition-colors leading-tight mb-1">
-                        Landing Page CSS-to-Tailwind Refactor
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-mono mb-2">Use case: Maintainability improvement</p>
-                      <p className="text-slate-400 text-xs leading-relaxed border-l-2 border-white/10 pl-3">
-                        Migrate legacy CSS stylesheets to utility-first Tailwind classes while maintaining exact pixel fidelity.
-                      </p>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between py-3 border-t border-border-dark mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Budget</span>
-                          <span className="text-xs font-mono text-white">50 ALGO</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Est. Duration</span>
-                          <span className="text-xs font-mono text-slate-300">~1 Day</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col text-right">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Type</span>
-                          <span className="text-xs font-mono text-slate-300">Frontend</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">Tailwind</span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">HTML</span>
-                        <div className="ml-auto">
-                          <span className="text-[10px] text-slate-600 flex items-center gap-1 font-mono">
-                            <span className="material-symbols-outlined text-[12px]">schedule</span> 1d ago
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-black border border-border-dark p-5 rounded-lg flex flex-col hover:border-primary/50 hover:bg-white/[0.02] transition-all duration-200 group relative shadow-sm hover:shadow-md cursor-pointer" onClick={() => setBankModal(true)}>
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="flex h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wide">ID: #8301</span>
-                    </div>
-                    <div className="mb-4">
-                      <h3 className="text-[15px] font-semibold text-white group-hover:text-primary transition-colors leading-tight mb-1">
-                        GPU Job Scheduler for Model Training
-                      </h3>
-                      <p className="text-[11px] text-slate-500 font-mono mb-2">Use case: Training computer vision model</p>
-                      <p className="text-slate-400 text-xs leading-relaxed border-l-2 border-white/10 pl-3">
-                        Implement a decentralized resource allocator to distribute compute loads across available GPU nodes.
-                      </p>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between py-3 border-t border-border-dark mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Budget</span>
-                          <span className="text-xs font-mono text-white">450 ALGO</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Est. Duration</span>
-                          <span className="text-xs font-mono text-slate-300">~5 Days</span>
-                        </div>
-                        <div className="h-6 w-px bg-border-dark"></div>
-                        <div className="flex flex-col text-right">
-                          <span className="text-[9px] text-slate-600 uppercase font-bold tracking-wider">Type</span>
-                          <span className="text-xs font-mono text-slate-300">Backend</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">Python</span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] text-slate-500 font-mono">CUDA</span>
-                        <div className="ml-auto">
-                          <span className="text-[10px] text-slate-600 flex items-center gap-1 font-mono">
-                            <span className="material-symbols-outlined text-[12px]">schedule</span> 1h ago
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div className="mt-8 flex items-center justify-end gap-2 border-t border-border-dark pt-4">
-                  <span className="text-[11px] text-slate-500 mr-4 font-mono">Page 1 of 12</span>
-                  <button className="w-7 h-7 rounded flex items-center justify-center border border-white/10 hover:bg-white/5 transition-colors text-slate-400">
-                    <span className="material-symbols-outlined text-sm">chevron_left</span>
-                  </button>
-                  <button className="w-7 h-7 rounded flex items-center justify-center border border-white/10 hover:bg-white/5 transition-colors text-slate-400">
-                    <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Other Tabs */}
-        {activeTab === 'pools' && (
-            <div className="animate-fade-in text-white pt-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Active Contract Card */}
-                    <div className="bg-black border border-border-dark p-6 flex flex-col rounded-lg hover:border-primary/50 transition-colors">
+                <div className="flex-1" id="task-grid">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {filteredTasks.length > 0 ? filteredTasks.map(task => (
+                      <div
+                        key={task.id}
+                        className="bg-zinc-900 border border-zinc-800 p-5 rounded-md flex flex-col hover:border-zinc-700 transition-all group relative cursor-pointer"
+                        onClick={() => handleHireAgent(task)}
+                      >
                         <div className="flex justify-between items-start mb-4">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active Contract</span>
-                            <span className="text-slate-500 font-mono text-xs">#8291</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`h-1.5 w-1.5 rounded-full ${task.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-mono">{task.status}</span>
+                          </div>
+                          <span className="text-[9px] font-mono text-zinc-600 font-bold tracking-widest uppercase">{task.id}</span>
                         </div>
-                        <h3 className="text-base font-medium text-slate-100 mb-1">Fix Login Auth Bug</h3>
-                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">Backend authentication service failing.</p>
+
+                        <div className="mb-4">
+                          <h3 className="text-sm font-bold text-zinc-50 group-hover:text-indigo-400 transition-colors leading-tight mb-2 line-clamp-2">
+                            {task.title}
+                          </h3>
+                          <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                            {task.description}
+                          </p>
+                        </div>
 
                         <div className="mt-auto">
-                            <div className="flex justify-between text-xs mb-2 uppercase tracking-wide font-medium">
-                                <span className="text-slate-500">Funded</span>
-                                <span className="text-slate-300 font-mono">450 / 600 ALGO</span>
+                          <div className="grid grid-cols-3 gap-2 py-3 border-t border-zinc-800 mb-3">
+                            <div>
+                              <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-widest mb-1">Budget</p>
+                              <p className="text-[11px] font-mono font-bold text-zinc-50 leading-none">{task.budget}</p>
                             </div>
-                            <div className="w-full bg-slate-800 rounded-full h-1.5 mb-6">
-                                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '75%' }}></div>
+                            <div className="border-x border-zinc-800 px-3">
+                              <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-widest mb-1">Duration</p>
+                              <p className="text-[11px] font-mono font-bold text-zinc-400 leading-none">{task.duration.split(' ')[0]}D</p>
                             </div>
+                            <div className="text-right">
+                              <p className="text-[8px] text-zinc-600 uppercase font-bold tracking-widest mb-1">Type</p>
+                              <p className="text-[11px] font-mono font-bold text-indigo-400 leading-none truncate">{task.type.slice(0, 4)}</p>
+                            </div>
+                          </div>
 
-                            <button onClick={() => setBankModal(true)} className="w-full py-2 bg-transparent border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white text-sm font-medium rounded transition-colors">Manage Pool</button>
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-1.5">
+                              {task.tech.slice(0, 2).map(t => (
+                                <span key={t} className="px-1.5 py-0.5 rounded-sm bg-zinc-800 text-[8px] text-zinc-400 font-bold uppercase tracking-widest">
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-[8px] text-zinc-600 font-mono font-bold uppercase tracking-wider">
+                              {task.postedAt}
+                            </span>
+                          </div>
                         </div>
-                    </div>
-
-                    <div className="bg-black border border-dashed border-border-dark p-6 flex flex-col items-center justify-center text-center hover:bg-slate-800/30 cursor-pointer transition-colors min-h-[250px] rounded-lg group" onClick={() => setBankModal(true)}>
-                        <div className="w-10 h-10 rounded-full bg-slate-800/50 border border-slate-700 flex items-center justify-center mb-3 group-hover:bg-slate-800 transition-colors">
-                             <span className="material-symbols-outlined text-slate-400 text-lg group-hover:text-white">add</span>
-                        </div>
-                        <span className="text-slate-400 font-medium text-sm group-hover:text-slate-200">Create New Pool</span>
-                    </div>
+                      </div>
+                    )) : (
+                      <div className="col-span-full py-20 flex flex-col items-center justify-center border border-zinc-800 rounded-md bg-zinc-950">
+                        <span className="material-symbols-outlined text-4xl text-zinc-800 mb-4 font-light">database_off</span>
+                        <p className="text-zinc-600 font-mono text-xs uppercase tracking-widest font-bold">No records found</p>
+                        <button onClick={resetFilters} className="mt-4 text-[10px] text-indigo-500 font-bold uppercase tracking-widest hover:underline">Clear Filters</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
             </div>
-        )}
-        {activeTab === 'gpu' && (
-          <div className="animate-fade-in text-white p-4">
-            <GPURental />
-          </div>
-        )}
+          )}
 
+          {activeTab === 'pools' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-zinc-900 border border-zinc-800 p-8 flex flex-col rounded-md hover:border-zinc-700 transition-all group overflow-hidden relative" onClick={() => handleHireAgent({ budget: 600, id: '#8291' })}>
+                  <div className="flex justify-between items-start mb-6">
+                    <span className="badge-solid bg-emerald-900/40 text-emerald-400 border border-emerald-900/50">Active Node</span>
+                    <span className="text-zinc-700 font-mono text-[10px] font-bold tracking-widest">REF: #8291</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-zinc-50 mb-2 tracking-tighter group-hover:text-indigo-400 transition-colors">Fix Login Auth Bug</h3>
+                  <p className="text-sm text-zinc-500 mb-8 font-medium leading-relaxed italic">"Backend authentication service failing with intermittent 503 errors under load."</p>
+
+                  <div className="mt-auto space-y-6">
+                    <div>
+                      <div className="flex justify-between text-[10px] mb-3 uppercase tracking-widest font-bold">
+                        <span className="text-zinc-600">Funding Progress</span>
+                        <span className="text-zinc-50 font-mono">450 <span className="text-zinc-700">/</span> 600</span>
+                      </div>
+                      <div className="w-full bg-zinc-950 rounded-full h-1 border border-zinc-800">
+                        <div className="bg-indigo-600 h-1 rounded-full transition-all duration-1000" style={{ width: '75%' }}></div>
+                      </div>
+                    </div>
+
+                    <button className="btn-premium w-full">
+                      Enter Terminal
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="bg-zinc-950 border-2 border-dashed border-zinc-800 p-8 flex flex-col items-center justify-center text-center hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer transition-all min-h-[300px] rounded-md group"
+                  onClick={handleInitEscrow}
+                >
+                  <div className="w-12 h-12 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:border-indigo-600 transition-all duration-300">
+                    <span className="material-symbols-outlined text-zinc-600 text-2xl group-hover:text-white transition-colors">add</span>
+                  </div>
+                  <span className="text-zinc-500 font-bold text-xs uppercase tracking-widest group-hover:text-white transition-all">Initialize New Node</span>
+                  <p className="text-[10px] text-zinc-700 mt-2 font-mono font-bold uppercase tracking-widest">Allocate funds for execution</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'gpu' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <GPURental onRent={(gpu) => handleHireAgent({ budget: gpu.pricePerHour, id: gpu.id })} />
+            </div>
+          )}
+
+          {activeTab === 'about' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <AboutSection />
+            </div>
+          )}
+        </div>
       </main>
 
       <ConnectWallet openModal={openWalletModal} closeModal={toggleWalletModal} />
@@ -411,9 +599,16 @@ const Home: React.FC = () => {
       <MintNFT openModal={mintNftModal} closeModal={() => setMintNftModal(false)} />
       <CreateASA openModal={createAsaModal} closeModal={() => setCreateAsaModal(false)} />
       <AssetOptIn openModal={assetOptInModal} closeModal={() => setAssetOptInModal(false)} />
-      <Bank openModal={bankModal} closeModal={() => setBankModal(false)} />
+      <Bank
+        openModal={bankModal}
+        closeModal={() => setBankModal(false)}
+        initialAmount={proposedEscrow?.amount}
+        initialMemo={proposedEscrow?.memo}
+        initialReceiver={proposedEscrow?.receiver}
+      />
     </div>
   )
 }
+
 
 export default Home

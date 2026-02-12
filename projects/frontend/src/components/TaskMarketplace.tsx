@@ -57,16 +57,16 @@ const TaskMarketplace: React.FC = () => {
     const [filter, setFilter] = useState('All')
 
     return (
-        <div>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Filters */}
-            <div className="flex gap-2 mb-8 overflow-x-auto pb-2 border-b border-slate-800/50">
+            <div className="flex gap-2 mb-8 overflow-x-auto pb-4 border-b border-zinc-900">
                 {['All', 'Frontend', 'Backend', 'Smart Contract', 'Design'].map((tag) => (
                     <button
                         key={tag}
                         onClick={() => setFilter(tag)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${filter === tag
-                            ? 'bg-slate-100/10 text-slate-100 border border-slate-700'
-                            : 'bg-transparent text-slate-400 border border-transparent hover:text-slate-200 hover:bg-slate-800/50'
+                        className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${filter === tag
+                            ? 'bg-zinc-800 text-zinc-50 border border-zinc-700'
+                            : 'bg-transparent text-zinc-500 border border-transparent hover:text-zinc-300 hover:bg-zinc-900'
                             }`}
                     >
                         {tag}
@@ -76,47 +76,46 @@ const TaskMarketplace: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {SAMPLE_TASKS.map((task) => (
-                    <div key={task.id} className="card-premium p-6 flex flex-col h-full group relative overflow-hidden">
-                        {/* Subtle Glow Effect on Hover (Optional, kept minimal) */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-
-                        <div className="flex justify-between items-start mb-4 relative z-10">
-                            <span className="badge-emerald">{task.bounty} ALGO</span>
-                            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm border ${task.difficulty === 'Easy' ? 'border-emerald-500/20 text-emerald-500' :
-                                task.difficulty === 'Medium' ? 'border-yellow-500/20 text-yellow-500' :
-                                    'border-red-500/20 text-red-500'
+                    <div key={task.id} className="bg-zinc-900 border border-zinc-800 p-6 flex flex-col h-full group transition-all hover:border-zinc-700 rounded-md">
+                        <div className="flex justify-between items-start mb-6">
+                            <span className="badge-solid bg-indigo-600 text-white font-mono">{task.bounty} ALGO</span>
+                            <span className={`text-[10px] uppercase font-bold tracking-widest font-mono ${task.difficulty === 'Easy' ? 'text-emerald-500' :
+                                task.difficulty === 'Medium' ? 'text-amber-500' :
+                                    'text-rose-500'
                                 }`}>
                                 {task.difficulty}
                             </span>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-slate-100 mb-2 group-hover:text-emerald-400 transition-colors relative z-10">{task.title}</h3>
-                        <p className="text-sm text-slate-400 mb-6 line-clamp-2 flex-grow leading-relaxed relative z-10">
+                        <h3 className="text-sm font-bold text-zinc-50 mb-3 group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{task.title}</h3>
+                        <p className="text-xs text-zinc-500 mb-8 line-clamp-3 leading-relaxed font-medium">
                             {task.description}
                         </p>
 
-                        <div className="pt-4 border-t border-slate-700/50 mt-auto relative z-10">
-                            <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="pt-6 border-t border-zinc-800 mt-auto">
+                            <div className="flex flex-wrap gap-1.5 mb-6">
                                 {task.tags.map((tag) => (
-                                    <span key={tag} className="text-[10px] text-slate-400 bg-slate-800/50 border border-slate-700/50 px-2 py-1 rounded">#{tag}</span>
+                                    <span key={tag} className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded-sm">
+                                        {tag}
+                                    </span>
                                 ))}
                             </div>
-                            <button className="btn-secondary w-full text-xs group-hover:border-slate-500 group-hover:text-slate-100">
-                                View Details
+                            <button className="w-full py-2 bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-sm border border-zinc-700 transition-all">
+                                View Specification
                             </button>
                         </div>
                     </div>
                 ))}
 
                 {/* Create New Task Teaser */}
-                <div className="card-premium border-dashed border-slate-700/50 bg-transparent p-6 flex flex-col items-center justify-center text-center hover:bg-slate-800/30 cursor-pointer transition-colors min-h-[300px] group">
-                    <div className="w-12 h-12 rounded-full bg-slate-800/80 flex items-center justify-center mb-4 group-hover:bg-slate-700 transition-colors">
-                        <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                        </svg>
+                <div
+                    className="border-2 border-dashed border-zinc-800 bg-transparent p-6 flex flex-col items-center justify-center text-center hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer transition-all min-h-[300px] group rounded-md"
+                >
+                    <div className="w-12 h-12 rounded-sm bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:border-indigo-600 transition-all duration-300">
+                        <span className="material-symbols-outlined text-zinc-600 text-2xl group-hover:text-white transition-colors">add</span>
                     </div>
-                    <h3 className="text-slate-300 font-medium mb-1">Post a Job</h3>
-                    <p className="text-slate-500 text-sm max-w-xs leading-relaxed">Need help? Create a bounty and get top talent to work on your project.</p>
+                    <h3 className="text-zinc-300 font-bold text-xs uppercase tracking-widest group-hover:text-white transition-all">Post a Job</h3>
+                    <p className="text-zinc-600 text-[10px] max-w-[200px] leading-relaxed mt-2 font-bold uppercase tracking-widest">Broadcast a unique bounty and recruit elite talent.</p>
                 </div>
             </div>
         </div>

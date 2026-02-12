@@ -38,7 +38,7 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
       const state = await counterClient.appClient.getGlobalState()
       return typeof state.count.value === 'bigint'
         ? Number(state.count.value)
-        : parseInt(state.count.value, 10)
+        : parseInt(state.count.value as string, 10)
     } catch (e) {
       console.error('Error fetching count:', e)
       return 0
@@ -87,67 +87,78 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
 
   return (
     <dialog id="appcalls_modal" className={`modal ${openModal ? 'modal-open' : ''}`}>
-      <div className="modal-box glass-card bg-slate-900/90 border-white/10 p-0 overflow-hidden max-w-md">
-        <div className="p-8">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h3 className="text-2xl font-bold text-white">Counter Contract</h3>
-              <p className="text-slate-400 text-sm mt-1">Interact with Algorand Smart Contracts</p>
+      <div className="modal-box bg-zinc-950 border border-zinc-800 p-0 overflow-hidden max-w-md shadow-2xl rounded-md">
+
+        {/* Header */}
+        <div className="p-6 border-b border-zinc-800 bg-zinc-900 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold text-zinc-50 flex items-center gap-2 tracking-tight">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+              On-Chain Counter
+            </h3>
+            <p className="text-[10px] text-zinc-500 font-mono font-bold mt-0.5 uppercase tracking-widest">Protocol // Core_State_v1</p>
+          </div>
+          <button
+            onClick={() => setModalState(false)}
+            className="text-zinc-600 hover:text-white transition-all w-8 h-8 flex items-center justify-center hover:bg-zinc-800 rounded-sm"
+          >
+            <span className="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        <div className="p-8 space-y-8">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-sm p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="material-symbols-outlined text-6xl">data_object</span>
             </div>
-            <button
-              onClick={() => setModalState(false)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-6 font-mono bg-zinc-900 px-2 py-0.5 rounded-sm border border-zinc-800">Application ID: {appId}</span>
+
+              <div className="flex flex-col items-center justify-center py-4">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 font-mono">Current Register Value</span>
+                <span className="text-7xl font-mono font-bold text-white tracking-tighter">{currentCount}</span>
+                <div className="w-12 h-0.5 bg-indigo-600 mt-4 rounded-full"></div>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-slate-400 text-sm">Application ID</span>
-                <span className="text-indigo-400 font-mono text-sm">{appId}</span>
-              </div>
-              <div className="flex flex-col items-center justify-center py-4">
-                <span className="text-slate-400 text-sm mb-1">On-Chain Value</span>
-                <span className="text-5xl font-black text-white tracking-tight">{currentCount}</span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                className={`btn-premium w-full flex items-center justify-center gap-2 ${loading ? 'opacity-80' : ''}`}
-                onClick={incrementCounter}
-                disabled={loading || !appId}
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </>
-                ) : (
-                  'Increment Counter'
-                )}
-              </button>
-              <p className="text-center text-xs text-slate-500">
-                This will trigger a NoOp call to increment the global state.
-              </p>
-            </div>
+          <div className="space-y-4">
+            <button
+              className={`w-full py-4 bg-indigo-600 text-white hover:bg-indigo-500 text-[10px] font-bold uppercase tracking-widest rounded-sm transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20 active:scale-[0.98]`}
+              onClick={incrementCounter}
+              disabled={loading || !appId}
+            >
+              {loading ? (
+                <>
+                  <span className="w-1.5 h-1.5 bg-white animate-ping rounded-full"></span>
+                  Processing Sequence...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-sm">add_circle</span>
+                  Increment Registry
+                </>
+              )}
+            </button>
+            <p className="text-center text-[9px] text-zinc-600 font-mono font-bold uppercase tracking-widest">
+              Execution Path: NoOp call to increment global_state
+            </p>
           </div>
         </div>
 
-        <div className="bg-white/5 p-4 border-t border-white/5 flex justify-end">
+        {/* Footer Area */}
+        <div className="bg-zinc-900 p-4 border-t border-zinc-800 flex justify-between items-center px-8">
+          <div className="flex items-center gap-2">
+            <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
+            <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest font-bold">State: Verified</span>
+          </div>
           <button
-            className="px-6 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+            className="text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-all"
             onClick={() => setModalState(false)}
             disabled={loading}
           >
-            Close
+            Close Terminal
           </button>
         </div>
       </div>

@@ -1,167 +1,220 @@
-# SkillSwap: Comprehensive Algorand dApp Starter Template
+# SkillSwap — Decentralized Skill & Resource Exchange
 
-**SkillSwap** is a robust, full-stack decentralized application (dApp) foundation designed to accelerate Web3 development on the Algorand blockchain. Built with a modern monorepo architecture, it bridges the gap between complex smart contract logic and user-friendly frontend interfaces.
+SkillSwap is a hybrid decentralized application (dApp) built on the **Algorand Blockchain**.  
+It provides a marketplace where students and developers can exchange skills, complete micro-tasks for crypto, and rent computational resources such as GPUs.
 
-This template is engineered for developers and founders who need a production-ready environment to prototype ideas—ranging from DeFi protocols to NFT marketplaces—without spending weeks on configuration.
+The system uses a hybrid architecture:
 
----
-
-## 🚀 Core Features & Capabilities
-
-SkillSwap comes pre-loaded with functional "cards"—modular feature sets that demonstrate critical Algorand capabilities.
-
-### 1. Decentralized Banking System (`Bank`)
-
-A sophisticated smart contract demonstration that functions as a non-custodial escrow.
-
-* **Deposit & Withdraw**: Users can securely deposit ALGO into the contract and withdraw their funds.
-* **State Management**: Utilizes **Box Storage** for scalable user data management and Global State for tracking total value locked (TVL).
-* **Indexer Integration**: The frontend fetches real-time transaction history and depositor lists using the Algorand Indexer, demonstrating how to read on-chain data efficiently.
-
-### 2. NFT Minting Engine (`MintNFT`)
-
-A complete end-to-end workflow for creating digital collectibles.
-
-* **IPFS Integration**: Seamlessly connects with **Pinata** to upload media files and metadata to the InterPlanetary File System (IPFS) before minting.
-* **ARC Compliance**: Mints NFTs following Algorand Request for Comments (ARC) standards, ensuring compatibility with major wallets and marketplaces.
-
-### 3. Asset Creation Studio (`CreateASA`)
-
-A toolset for minting Algorand Standard Assets (ASAs).
-
-* **Tokenomics Configuration**: Allows users to define token names, unit names, total supply, and decimal precision.
-* **Fungible Tokens**: Ideal for creating loyalty points, stablecoins, or platform utility tokens.
-
-### 4. Secure Payments (`Transact`)
-
-A streamlined interface for blockchain transactions.
-
-* **Multi-Asset Support**: Designed to handle ALGO transfers as well as ASA (e.g., USDC) payments.
-* **Wallet Integration**: Connects with popular wallets (Pera, Defly, etc.) for signing transactions.
-
-### 5. On-Chain Counter (`Counter`)
-
-A foundational example for developers new to smart contracts.
-
-* **State Manipulation**: Demonstrates the basics of application calls (AppCalls) and state updates.
-* **Debugging**: Useful for testing connectivity and contract deployment flows.
+- **On-Chain:** Algorand smart contracts handle escrow, deposits, and payments.
+- **Off-Chain:** Supabase manages user profiles, authentication, and task metadata.
+- **Storage:** IPFS (via Pinata) and Firebase handle file storage and media.
 
 ---
 
-## 🛠 Technical Architecture
+## Features
 
-The project utilizes the **AlgoKit** monorepo structure, ensuring a cohesive development lifecycle.
+### Core Platform
+- Individual tasks and group-funded task pools  
+- On-chain escrow with approval-based payments  
+- Task marketplace for posting and completing work  
+- Wallet-based authentication using Pera  
 
-### Smart Contracts (Backend)
-
-* **Language**: **Algorand Python (`algopy`)** — Writes like Python, compiles to AVM (Algorand Virtual Machine) bytecode.
-* **Dependency Management**: **Poetry** — Handles Python dependencies and virtual environments.
-* **Testing**: Includes a suite of tests using `pytest` and `algorand-python-testing`.
-
-### Frontend (User Interface)
-
-* **Framework**: **React** (v18) with **TypeScript** — High-performance component-based UI.
-* **Build Tool**: **Vite** — Lightning-fast development server and bundler.
-* **Styling**: **TailwindCSS** & **DaisyUI** — Utility-first CSS framework for rapid, responsive design.
-* **Blockchain Client**: `@txnlab/use-wallet` for wallet connections and `algosdk` for transaction construction.
+### Extended Features
+- GPU rental marketplace  
+- NFT minting for skill badges  
+- Hybrid login (Supabase + Wallet)  
+- Multi-wallet support  
 
 ---
 
-## 💻 Getting Started Guide
+## Architecture Overview
 
-Follow these steps to set up your local development environment.
+Users (Browser)
+│
+▼
+Frontend (React / Next.js / Tailwind)
+│
+├── Wallet (Pera) → Algorand Network (Smart Contracts)
+│
+▼
+Backend / Worker (Node.js or Python)
+│
+▼
+Supabase (Auth + Database)
+│
+▼
+IPFS / Firebase Storage
 
-### Prerequisites
+---
 
-Ensure you have the following installed:
+## Repository Structure
+projects/
+├── contracts # Smart contracts and deployment scripts
+├── frontend # React web application
 
-1. **Docker**: Required to run the LocalNet (Algorand Sandbox).
-2. **Node.js**: Version 18 or higher.
-3. **AlgoKit CLI**: The official command-line tool for Algorand development.
 
-### Installation & Setup
+### Contracts
+- Written in Python using PyTeal  
+- Compiled to TEAL for Algorand AVM  
 
-1. **Clone the Repository**
+### Frontend
+- React + TypeScript  
+- Wallet integration  
+- Supabase integration  
+
+---
+
+## Tech Stack
+
+**Frontend**
+- React / Next.js  
+- TypeScript  
+- Tailwind CSS  
+
+**Blockchain**
+- Algorand  
+- PyTeal Smart Contracts  
+- AlgoKit  
+
+**Backend & Storage**
+- Node.js / Python  
+- Supabase (Auth + DB)  
+- IPFS via Pinata  
+- Firebase Storage  
+
+**Tools**
+- algosdk  
+- AlgoKit LocalNet  
+- WalletConnect / Pera Wallet  
+
+---
+
+## Prerequisites
+
+Install before running:
+
+- Docker Desktop  
+- Node.js (v18 or higher)  
+- Python (3.10 or higher)  
+- AlgoKit CLI  
+
+Install AlgoKit:
 ```bash
-git clone https://github.com/marotipatre/Hackseries-2-QuickStart-template.git
-cd Hackseries-2-QuickStart-template
+pipx install algokit
 
-```
+Installation & Setup
+Clone repository
+git clone https://github.com/Anand-2006/SkillSwap.git
+cd SkillSwap
 
+Bootstrap dependencies
+algokit bootstrap all
 
-2. **Bootstrap the Project**
-This command installs system-wide dependencies, sets up Python virtual environments, and installs NPM packages.
-```bash
-algokit project bootstrap all
+Start local blockchain
+algokit localnet start
 
-```
+Deploy smart contracts
+cd projects/contracts
+algokit project deploy localnet
 
-
-3. **Build Smart Contracts**
-Compiles your Python contracts into TEAL and generates TypeScript clients for the frontend.
-```bash
-algokit project run build
-
-```
-
-
-4. **Launch the Frontend**
-```bash
-cd projects/frontend
+Run frontend
+cd ../frontend
 npm install
 npm run dev
 
-```
+
+Open:
+
+http://localhost:5173
+
+Environment Variables
+
+Inside projects/frontend:
+
+cp .env.template .env
 
 
-Your app should now be running at `http://localhost:5173`.
+Fill values:
 
----
+VITE_SUPABASE_URL=your_url
+VITE_SUPABASE_ANON_KEY=your_key
+VITE_PINATA_JWT=your_token
+VITE_GATEWAY_URL=your_gateway
+VITE_WALLETCONNECT_PROJECT_ID=your_project_id
 
-## ⚙️ Environment Configuration
+Demo Flow
 
-To interact with the **TestNet** or use external services like Pinata, you must configure your environment variables. Create a `.env` file in `projects/frontend/`:
+Connect wallet (Pera)
 
-| Variable | Description | Recommended Value (TestNet) |
-| --- | --- | --- |
-| `VITE_ALGOD_SERVER` | Algorand Node URL | `https://testnet-api.algonode.cloud` |
-| `VITE_ALGOD_PORT` | Node Port | *(Leave empty for AlgoNode)* |
-| `VITE_ALGOD_NETWORK` | Network Name | `testnet` |
-| `VITE_INDEXER_SERVER` | Indexer URL | `https://testnet-idx.algonode.cloud` |
-| `VITE_PINATA_JWT` | Pinata API Token | `Your_JWT_Key_Here` (Required for NFTs) |
-| `VITE_PINATA_GATEWAY` | IPFS Gateway | `https://gateway.pinata.cloud/ipfs` (Optional) |
+Select mode: Individual task or Group pool
 
-*Note: You can generate a Pinata JWT at [pinata.cloud*](https://app.pinata.cloud/developers/api-keys).
+Create task or create pool and set target
 
----
+Members deposit funds (group mode)
 
-## 📂 Project Structure Overview
+Leader posts task
 
-Understanding the file layout is key to customization.
+Provider submits work
 
-* **`projects/contracts/`**: Contains all smart contract logic.
-* `smart_contracts/bank/contract.py`: The logic for the Banking app.
-* `smart_contracts/counter/contract.py`: The logic for the Counter app.
+Leader approves → payment released
 
+Show transaction on Algorand explorer
 
-* **`projects/frontend/`**: The React application.
-* `src/Home.tsx`: Main landing page.
-* `src/components/Bank.tsx`: UI for the Bank contract.
-* `src/components/Transact.tsx`: Payment interface.
-* `src/utils/pinata.ts`: Utilities for IPFS interactions.
+Smart Contracts
 
+Located in:
 
+projects/contracts
 
----
+Bank Contract
 
-## 🎨 UI Customization & AI Integration
+deposit()
 
-This template is designed to be easily redesigned using AI tools. You can copy the contents of specific components and use the provided prompts in the `README.md` to restyle them with TailwindCSS without breaking the underlying logic.
+withdraw()
 
-**Example Components to Customize:**
+Tracks balances on-chain
 
-* **Landing Page**: `projects/frontend/src/Home.tsx`
-* **Dashboard**: `projects/frontend/src/components/Bank.tsx`
-* **NFT Minter**: `projects/frontend/src/components/MintNFT.tsx`
+Escrow / Task Contracts
 
-For detailed AI prompts to redesign these components, refer to Section 4 of the original `README.md` included in the project files.
+Lock funds
+
+Release after approval
+
+Refund on timeout
+
+Counter Contract
+
+Demonstrates shared global state
+
+Troubleshooting
+
+App ID not found
+
+Redeploy contracts after restarting LocalNet.
+
+Transactions failing
+
+Ensure wallet is connected to LocalNet or TestNet.
+
+Uploads failing
+
+Verify Pinata JWT token.
+
+Future Scope
+
+Reputation and rating system
+
+DAO-based dispute resolution
+
+Mobile app
+
+AI-based task matching
+
+Cross-campus deployment
+
+License
+
+MIT License
+
+Team : Penguin_on_Peak
+Hackspiration 2026
